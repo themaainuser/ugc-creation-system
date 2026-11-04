@@ -1,0 +1,136 @@
+{
+  "regions": [
+    {
+      "id": "factory-ground",
+      "kind": "texture",
+      "grid": "A6:J8",
+      "note": "Clean sample of the floor ground: matte steel blue-grey enamel over the faint hazard-yellow floor-tape grid, no ink on it. Page tiles this as the base material; the visible band A5:J8 and the empty floor inside every station panel are the same material."
+    },
+    {
+      "id": "header-band",
+      "kind": "chrome",
+      "grid": "A0:J0",
+      "note": "Riveted steel header bar: stencil wordmark UGC FACTORY, subtitle, dot-matrix LED counter strip (BRIEFS/QUEUE/TAKT) on inset black, and the ARIA persona chip. All code-drawn.",
+      "codeDrawn": true
+    },
+    {
+      "id": "st-intake",
+      "kind": "chrome",
+      "grid": "A1:C4",
+      "note": "Station 01 INTAKE panel: enamel body with corner bolt heads, stencil numeral 01, andon lamp. Code-drawn.",
+      "codeDrawn": true
+    },
+    {
+      "id": "intake-phone",
+      "kind": "chrome",
+      "grid": "A2:B4",
+      "note": "9:16 phone viewport: inset black screen with notch, red pulsing REC dot, and caption bar. Code-drawn, no imagery.",
+      "codeDrawn": true
+    },
+    {
+      "id": "intake-form",
+      "kind": "control",
+      "grid": "B1:C4",
+      "note": "REEL TRANSCRIPT textarea and the WHY IT FITS THIS PERSONA input plate, with monospace labels. Code-drawn form controls.",
+      "codeDrawn": true
+    },
+    {
+      "id": "st-analyzer",
+      "kind": "chrome",
+      "grid": "D1:E4",
+      "note": "Station 02 ANALYZER panel: enamel body, bolts, stencil numeral 02, andon lamp. Code-drawn.",
+      "codeDrawn": true
+    },
+    {
+      "id": "hook-card",
+      "kind": "control",
+      "grid": "D1:E2",
+      "note": "Hook card: PATTERN-INTERRUPT chip on a bordered inset plate. Code-drawn.",
+      "codeDrawn": true
+    },
+    {
+      "id": "beat-timeline",
+      "kind": "control",
+      "grid": "D2:E3",
+      "note": "Three-row beat timeline with amber mono timestamps (0:00-0:03 hook, 0:03-0:18 setup, 0:18-0:28 payoff). Code-drawn.",
+      "codeDrawn": true
+    },
+    {
+      "id": "verdict-stamp",
+      "kind": "control",
+      "grid": "D3:E3",
+      "note": "Diagonal red REMIX rubber stamp, double-ruled border, rotated. Code-drawn, not a raster stamp image.",
+      "codeDrawn": true
+    },
+    {
+      "id": "st-stylist",
+      "kind": "chrome",
+      "grid": "F1:F4",
+      "note": "Station 03 STYLIST panel: enamel body, bolts, stencil numeral 03, andon lamp. Code-drawn.",
+      "codeDrawn": true
+    },
+    {
+      "id": "garment-cells",
+      "kind": "control",
+      "grid": "F1:F3",
+      "note": "Three garment thumbnail placeholder cells (dress, gold, heels) each with a green/amber formality meter bar. Flat placeholder fills, code-drawn; real garment photos drop in here later as image regions.",
+      "codeDrawn": true
+    },
+    {
+      "id": "stylist-chips",
+      "kind": "control",
+      "grid": "F4:F4",
+      "note": "MDEP chips playful / casual / mall in amber mono. Code-drawn.",
+      "codeDrawn": true
+    },
+    {
+      "id": "st-expression",
+      "kind": "chrome",
+      "grid": "G1:H4",
+      "note": "Station 04 EXPRESSION panel: enamel body, bolts, stencil numeral 04, andon lamp. Code-drawn.",
+      "codeDrawn": true
+    },
+    {
+      "id": "expression-dial",
+      "kind": "control",
+      "grid": "G1:H3",
+      "note": "Rotary expression dial: knurled rim, cap, amber indicator needle, mischievous_grin label. Code-drawn, no raster dial.",
+      "codeDrawn": true
+    },
+    {
+      "id": "expression-lamps",
+      "kind": "control",
+      "grid": "G3:H4",
+      "note": "GENUINE (green, lit) and PERFORMED (dark) andon status lamps. Code-drawn.",
+      "codeDrawn": true
+    },
+    {
+      "id": "st-dispatch",
+      "kind": "chrome",
+      "grid": "I1:J4",
+      "note": "Station 05 DISPATCH panel: enamel body, bolts, stencil numeral 05, andon lamp. Code-drawn.",
+      "codeDrawn": true
+    },
+    {
+      "id": "job-ticket",
+      "kind": "chrome",
+      "grid": "I1:J4",
+      "note": "Cream paper job ticket with torn top edge, PERSONA/HOOK/SCRIPT/EXPRESSION/CAPTION print, and a red REMIX stamp. Flat cream fill + code-drawn type and stamp; no paper-grain raster.",
+      "codeDrawn": true
+    },
+    {
+      "id": "conveyor-rail",
+      "kind": "chrome",
+      "grid": "A5:J5",
+      "note": "Horizontal steel conveyor beam crossing the full width with the glowing amber job token riding it. Code-drawn.",
+      "codeDrawn": true
+    },
+    {
+      "id": "dial-bank",
+      "kind": "chrome",
+      "grid": "A9:J9",
+      "note": "Bottom control deck: four knurled MDEP dials (MOOD/DAY/ENVIRONMENT/PLACE) with amber needles and labels, hazard-tape top edge, green mono readout strip, and the amber RUN LINE button. All code-drawn.",
+      "codeDrawn": true
+    }
+  ]
+}

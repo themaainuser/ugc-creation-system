@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Scaffold reference: comp-conveyor.png</title>
+  <link rel="stylesheet" href="layout.css">
+  <style>html,body{margin:0}body{background:#1d1d2d}.region{box-sizing:border-box}.region.text p{white-space:pre-wrap}</style>
+</head>
+<body>
+<!-- Reference only. Every region sits at its measured box inside a comp-aspect frame. Take the boxes (layout.css), keep your own semantic structure. -->
+<main class="comp-frame" style="max-width:1440px">
+  <div class="r-factory-ground region texture" data-region="factory-ground" style="background-image:url('../../../assets/plates/factory-ground.png');background-repeat:repeat"></div>
+  <div class="r-header-band region chrome" data-region="header-band"><!-- Riveted steel header bar: stencil wordmark UGC FACTORY, subtitle, dot-matrix LED counter strip (BRIEFS/QUEUE/TAKT) on inset black, and the ARIA persona chip. All code-drawn. --></div>
+  <div class="r-st-intake region chrome" data-region="st-intake"><!-- Station 01 INTAKE panel: enamel body with corner bolt heads, stencil numeral 01, andon lamp. Code-drawn. --></div>
+  <div class="r-intake-phone region chrome" data-region="intake-phone"><!-- 9:16 phone viewport: inset black screen with notch, red pulsing REC dot, and caption bar. Code-drawn, no imagery. --></div>
+  <div class="r-intake-form region control" data-region="intake-form"><!-- REEL TRANSCRIPT textarea and the WHY IT FITS THIS PERSONA input plate, with monospace labels. Code-drawn form controls.: rebuild the control's chrome from the crop (comp-spec.mjs --crop intake-form); its ink box, border, fill, radius, and label size are the comp's --></div>
+  <div class="r-st-analyzer region chrome" data-region="st-analyzer"><!-- Station 02 ANALYZER panel: enamel body, bolts, stencil numeral 02, andon lamp. Code-drawn. --></div>
+  <div class="r-hook-card region control" data-region="hook-card"><!-- Hook card: PATTERN-INTERRUPT chip on a bordered inset plate. Code-drawn.: rebuild the control's chrome from the crop (comp-spec.mjs --crop hook-card); its ink box, border, fill, radius, and label size are the comp's --></div>
+  <div class="r-beat-timeline region control" data-region="beat-timeline"><!-- Three-row beat timeline with amber mono timestamps (0:00-0:03 hook, 0:03-0:18 setup, 0:18-0:28 payoff). Code-drawn.: rebuild the control's chrome from the crop (comp-spec.mjs --crop beat-timeline); its ink box, border, fill, radius, and label size are the comp's --></div>
+  <div class="r-verdict-stamp region control" data-region="verdict-stamp"><!-- Diagonal red REMIX rubber stamp, double-ruled border, rotated. Code-drawn, not a raster stamp image.: rebuild the control's chrome from the crop (comp-spec.mjs --crop verdict-stamp); its ink box, border, fill, radius, and label size are the comp's --></div>
+  <div class="r-st-stylist region chrome" data-region="st-stylist"><!-- Station 03 STYLIST panel: enamel body, bolts, stencil numeral 03, andon lamp. Code-drawn. --></div>
+  <div class="r-garment-cells region control" data-region="garment-cells"><!-- Three garment thumbnail placeholder cells (dress, gold, heels) each with a green/amber formality meter bar. Flat placeholder fills, code-drawn; real garment photos drop in here later as image regions.: rebuild the control's chrome from the crop (comp-spec.mjs --crop garment-cells); its ink box, border, fill, radius, and label size are the comp's --></div>
+  <div class="r-stylist-chips region control" data-region="stylist-chips"><!-- MDEP chips playful / casual / mall in amber mono. Code-drawn.: rebuild the control's chrome from the crop (comp-spec.mjs --crop stylist-chips); its ink box, border, fill, radius, and label size are the comp's --></div>
+  <div class="r-st-expression region chrome" data-region="st-expression"><!-- Station 04 EXPRESSION panel: enamel body, bolts, stencil numeral 04, andon lamp. Code-drawn. --></div>
+  <div class="r-expression-dial region control" data-region="expression-dial"><!-- Rotary expression dial: knurled rim, cap, amber indicator needle, mischievous_grin label. Code-drawn, no raster dial.: rebuild the control's chrome from the crop (comp-spec.mjs --crop expression-dial); its ink box, border, fill, radius, and label size are the comp's --></div>
+  <div class="r-expression-lamps region control" data-region="expression-lamps"><!-- GENUINE (green, lit) and PERFORMED (dark) andon status lamps. Code-drawn.: rebuild the control's chrome from the crop (comp-spec.mjs --crop expression-lamps); its ink box, border, fill, radius, and label size are the comp's --></div>
+  <div class="r-st-dispatch region chrome" data-region="st-dispatch"><!-- Station 05 DISPATCH panel: enamel body, bolts, stencil numeral 05, andon lamp. Code-drawn. --></div>
+  <div class="r-job-ticket region chrome" data-region="job-ticket"><!-- Cream paper job ticket with torn top edge, PERSONA/HOOK/SCRIPT/EXPRESSION/CAPTION print, and a red REMIX stamp. Flat cream fill + code-drawn type and stamp; no paper-grain raster. --></div>
+  <div class="r-conveyor-rail region chrome" data-region="conveyor-rail"><!-- Horizontal steel conveyor beam crossing the full width with the glowing amber job token riding it. Code-drawn. --></div>
+  <div class="r-dial-bank region chrome" data-region="dial-bank"><!-- Bottom control deck: four knurled MDEP dials (MOOD/DAY/ENVIRONMENT/PLACE) with amber needles and labels, hazard-tape top edge, green mono readout strip, and the amber RUN LINE button. All code-drawn. --></div>
+</main>
+</body>
+</html>

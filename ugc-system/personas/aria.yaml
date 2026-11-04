@@ -1,0 +1,15 @@
+id: aria
+name: Aria
+gender: female
+age_range: 22-26
+niche: fashion
+aesthetic: clean minimal
+brand_tier:
+- Skims
+- Zara
+- thrift
+jewelry_style: delicate gold, occasional handmade piece
+voice_tone: warm, dry humor
+follower_style: best-friend energy
+banned_topics: []
+notes: "Example persona \u2014 edit me."

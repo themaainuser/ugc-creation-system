@@ -1,0 +1,309 @@
+[
+  {
+    "path": "assets\\seed\\bonkers_corner_street_dress.png",
+    "category": "full-fit",
+    "brands": [
+      "Bonkers Corner"
+    ],
+    "colors": [
+      "black"
+    ],
+    "style_tags": [
+      "streetwear",
+      "casual"
+    ],
+    "formality": 4
+  },
+  {
+    "path": "assets\\seed\\delicate_gold_necklace.png",
+    "category": "jewelry",
+    "brands": [
+      "Hermes"
+    ],
+    "colors": [
+      "gold"
+    ],
+    "style_tags": [
+      "minimal",
+      "formal"
+    ],
+    "formality": 6
+  },
+  {
+    "path": "assets\\seed\\gucci_lux_heels.png",
+    "category": "footwear",
+    "brands": [
+      "Gucci"
+    ],
+    "colors": [
+      "black"
+    ],
+    "style_tags": [
+      "statement",
+      "formal"
+    ],
+    "formality": 9
+  },
+  {
+    "path": "assets\\seed\\gucci_statement_top.png",
+    "category": "top",
+    "brands": [
+      "Gucci"
+    ],
+    "colors": [
+      "green"
+    ],
+    "style_tags": [
+      "statement",
+      "formal"
+    ],
+    "formality": 7
+  },
+  {
+    "path": "assets\\seed\\handmade_pebble_ring.png",
+    "category": "jewelry",
+    "brands": [
+      "handmade"
+    ],
+    "colors": [
+      "grey"
+    ],
+    "style_tags": [
+      "handmade",
+      "gift",
+      "thrift"
+    ],
+    "formality": 2
+  },
+  {
+    "path": "assets\\seed\\handmade_shell_necklace.png",
+    "category": "jewelry",
+    "brands": [
+      "handmade"
+    ],
+    "colors": [
+      "white"
+    ],
+    "style_tags": [
+      "thrift",
+      "handmade",
+      "gift"
+    ],
+    "formality": 3
+  },
+  {
+    "path": "assets\\seed\\heels_formal_pump.png",
+    "category": "footwear",
+    "brands": [
+      "Prada"
+    ],
+    "colors": [
+      "nude"
+    ],
+    "style_tags": [
+      "formal",
+      "minimal"
+    ],
+    "formality": 7
+  },
+  {
+    "path": "assets\\seed\\hermes_formal_trousers.png",
+    "category": "bottom",
+    "brands": [
+      "Hermes"
+    ],
+    "colors": [
+      "navy"
+    ],
+    "style_tags": [
+      "formal",
+      "minimal"
+    ],
+    "formality": 8
+  },
+  {
+    "path": "assets\\seed\\levi_casual_jeans.png",
+    "category": "bottom",
+    "brands": [
+      "Zara"
+    ],
+    "colors": [
+      "blue"
+    ],
+    "style_tags": [
+      "casual",
+      "streetwear"
+    ],
+    "formality": 3
+  },
+  {
+    "path": "assets\\seed\\lv_resort_dress.png",
+    "category": "full-fit",
+    "brands": [
+      "lv"
+    ],
+    "colors": [
+      "gold"
+    ],
+    "style_tags": [
+      "formal",
+      "statement",
+      "resort"
+    ],
+    "formality": 9
+  },
+  {
+    "path": "assets\\seed\\nike_court_sneakers.png",
+    "category": "footwear",
+    "brands": [
+      "Nike"
+    ],
+    "colors": [
+      "white"
+    ],
+    "style_tags": [
+      "streetwear",
+      "athletic"
+    ],
+    "formality": 3
+  },
+  {
+    "path": "assets\\seed\\nike_streetwear_hoodie.png",
+    "category": "top",
+    "brands": [
+      "Nike"
+    ],
+    "colors": [
+      "red"
+    ],
+    "style_tags": [
+      "streetwear",
+      "athletic"
+    ],
+    "formality": 2
+  },
+  {
+    "path": "assets\\seed\\prada_statement_blazer.png",
+    "category": "top",
+    "brands": [
+      "Prada"
+    ],
+    "colors": [
+      "black"
+    ],
+    "style_tags": [
+      "formal",
+      "statement"
+    ],
+    "formality": 8
+  },
+  {
+    "path": "assets\\seed\\skims_cozy_tee.png",
+    "category": "top",
+    "brands": [
+      "Skims"
+    ],
+    "colors": [
+      "beige"
+    ],
+    "style_tags": [
+      "cozy",
+      "casual",
+      "minimal"
+    ],
+    "formality": 3
+  },
+  {
+    "path": "assets\\seed\\skims_minimal_loungeset.png",
+    "category": "full-fit",
+    "brands": [
+      "Skims"
+    ],
+    "colors": [
+      "taupe"
+    ],
+    "style_tags": [
+      "cozy",
+      "casual",
+      "minimal"
+    ],
+    "formality": 2
+  },
+  {
+    "path": "assets\\seed\\statement_silver_chain.png",
+    "category": "jewelry",
+    "brands": [
+      "Nike"
+    ],
+    "colors": [
+      "silver"
+    ],
+    "style_tags": [
+      "statement",
+      "streetwear"
+    ],
+    "formality": 4
+  },
+  {
+    "path": "assets\\seed\\thrift_canvas_sandals.png",
+    "category": "footwear",
+    "brands": [
+      "thrift"
+    ],
+    "colors": [
+      "tan"
+    ],
+    "style_tags": [
+      "resort",
+      "casual",
+      "thrift"
+    ],
+    "formality": 2
+  },
+  {
+    "path": "assets\\seed\\thrift_distressed_tee.png",
+    "category": "top",
+    "brands": [
+      "thrift"
+    ],
+    "colors": [
+      "washed"
+    ],
+    "style_tags": [
+      "thrift",
+      "casual",
+      "streetwear"
+    ],
+    "formality": 2
+  },
+  {
+    "path": "assets\\seed\\thrift_vintage_skirt.png",
+    "category": "bottom",
+    "brands": [
+      "thrift"
+    ],
+    "colors": [
+      "floral"
+    ],
+    "style_tags": [
+      "thrift",
+      "casual"
+    ],
+    "formality": 4
+  },
+  {
+    "path": "assets\\seed\\zara_minimal_blouse.png",
+    "category": "top",
+    "brands": [
+      "Zara"
+    ],
+    "colors": [
+      "white"
+    ],
+    "style_tags": [
+      "minimal",
+      "formal"
+    ],
+    "formality": 6
+  }
+]

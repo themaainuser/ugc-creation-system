@@ -1,0 +1,14 @@
+{
+  "category": "footwear",
+  "brands": [
+    "Nike"
+  ],
+  "colors": [
+    "white"
+  ],
+  "style_tags": [
+    "streetwear",
+    "athletic"
+  ],
+  "formality": 3
+}

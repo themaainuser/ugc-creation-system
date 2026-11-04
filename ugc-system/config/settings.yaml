@@ -1,0 +1,50 @@
+# UGC System settings — tuned for daily operator use
+decision:
+  # JEV calibrated gate: >= this P → automate. Below → escalate.
+  automate_threshold: 0.72
+  # Brier calibration (Platt) — matches stated P to observed accuracy
+  platt_a: 1.1
+  platt_b: 0.05
+  # Diversity: after N days of same outfit, force rotation
+  outfit_cooldown_days: 3
+  # Brand safety: performed emotions banned when these topics present
+  brand_trust_topics: [brand-deal, sponsor, betting, policyprediction, prediction-market, adult-wellness, condom, sex-wellness]
+styling:
+  # weights for candidate scoring (sum=1.0)
+  weights:
+    formality_fit: 0.30
+    place_tag_match: 0.20
+    mood_tag_match: 0.15
+    brand_tier_match: 0.20
+    aesthetic_match: 0.10
+    diversity_bonus: 0.05
+  # Which jewelry styles are unbranded/handmade (shell/pebble handmade etc.)
+  handmade_jewelry_tags: [handmade, shell, pebble, thrift, crafted, gift]
+expressions:
+  # MDEP mood → ordered expression candidates (first = primary if allowed)
+  mood_map:
+    confident: [smirk, genuine_smile]
+    cozy: [calm_content, genuine_smile]
+    playful: [mischievous_grin, excited_burst]
+    elegant: [calm_content, polite_interest]
+    edgy: [smirk, deadpan]
+    relaxed: [calm_content, focused_flow]
+    neutral: [genuine_smile, focused_flow]
+    grateful: [calm_content, genuine_smile]
+    sad: [calm_content]
+    focused: [focused_flow]
+reel:
+  # Heuristic quality signals → verdict calibration
+  # recreate requires BOTH high hook score AND high structural score
+  recreate_min_hook: 0.80
+  recreate_min_structure: 0.75
+  # Niche keyword → tag map (fashion/travel/comedy/tech/adult/betting etc.)
+  niche_keywords:
+    fashion: [dress, outfit, style, brand, prada, gucci, hermes, looks]
+    travel: [vacation, flight, hotel, beach, trip, goa, dubai, bali]
+    food: [food, recipe, cook, restaurant, taste, dish, cafe, coffee]
+    comedy: [funny, joke, prank, lol, comedy, roast]
+    tech: [phone, gadget, app, ai, laptop, review, tech]
+    adult_wellness: [condom, wellness, intimacy, sex]
+    betting: [stake, 1xbet, 4rabet, polymarket, kalshi, bet, odds, prediction]
+    dance: [dance, choreo, bpm, beat]

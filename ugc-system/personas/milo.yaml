@@ -1,0 +1,15 @@
+id: milo
+name: Milo
+gender: male
+age_range: 22-27
+niche: tech
+aesthetic: streetwear minimal
+brand_tier:
+- Nike
+- Zara
+- thrift
+jewelry_style: silver chain, occasional handmade leather bracelet
+voice_tone: dry, deadpan
+follower_style: hype-man energy
+banned_topics: []
+notes: "Male tech persona — gadget reviews and POV unboxings."

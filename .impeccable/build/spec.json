@@ -1,0 +1,1034 @@
+{
+  "tool": "comp-spec",
+  "version": 1,
+  "createdAt": "2026-10-29T15:22:26.033Z",
+  "comp": ".impeccable/mocks/comp-conveyor.png",
+  "warnings": [
+    "region header-band: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region st-intake: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region intake-phone: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region intake-form: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region st-analyzer: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region hook-card: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region beat-timeline: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region verdict-stamp: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region st-stylist: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region garment-cells: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region stylist-chips: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region st-expression: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region expression-dial: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region expression-lamps: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region st-dispatch: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region job-ticket: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region conveyor-rail: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region dial-bank: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)"
+  ],
+  "uncoveredInkCells": [],
+  "compSize": {
+    "width": 1440,
+    "height": 900
+  },
+  "aspect": 1.6,
+  "orientation": "landscape",
+  "palette": [
+    {
+      "hex": "#1d1d2d",
+      "coverage": 0.6784
+    },
+    {
+      "hex": "#1f2f2f",
+      "coverage": 0.2066
+    },
+    {
+      "hex": "#f8e8d8",
+      "coverage": 0.062
+    },
+    {
+      "hex": "#0f1111",
+      "coverage": 0.044
+    },
+    {
+      "hex": "#f8b82f",
+      "coverage": 0.009
+    }
+  ],
+  "bands": [
+    {
+      "y": 0.1,
+      "strength": 0.212
+    },
+    {
+      "y": 0.1625,
+      "strength": 0.369
+    },
+    {
+      "y": 0.45,
+      "strength": 0.3272
+    },
+    {
+      "y": 0.5,
+      "strength": 0.2177
+    },
+    {
+      "y": 0.8625,
+      "strength": 0.8144
+    },
+    {
+      "y": 0.9,
+      "strength": 0.2657
+    },
+    {
+      "y": 0.9625,
+      "strength": 0.2632
+    }
+  ],
+  "regions": [
+    {
+      "id": "factory-ground",
+      "kind": "texture",
+      "note": "Clean sample of the floor ground: matte steel blue-grey enamel over the faint hazard-yellow floor-tape grid, no ink on it. Page tiles this as the base material; the visible band A5:J8 and the empty floor inside every station panel are the same material.",
+      "grid": "A6:J8",
+      "box": {
+        "x": 0,
+        "y": 0.6,
+        "w": 1,
+        "h": 0.3
+      },
+      "px": {
+        "x": 0,
+        "y": 540,
+        "w": 1440,
+        "h": 270
+      },
+      "aspect": 5.3333,
+      "palette": [
+        {
+          "hex": "#181828",
+          "coverage": 0.8579
+        },
+        {
+          "hex": "#182828",
+          "coverage": 0.1199
+        },
+        {
+          "hex": "#c89818",
+          "coverage": 0.0222
+        }
+      ],
+      "detail": {
+        "energy": 5.0528
+      },
+      "medium": "raster",
+      "plate": "assets/plates/factory-ground.png",
+      "text": null
+    },
+    {
+      "id": "header-band",
+      "kind": "chrome",
+      "note": "Riveted steel header bar: stencil wordmark UGC FACTORY, subtitle, dot-matrix LED counter strip (BRIEFS/QUEUE/TAKT) on inset black, and the ARIA persona chip. All code-drawn.",
+      "grid": "A0:J0",
+      "codeDrawn": true,
+      "box": {
+        "x": 0,
+        "y": 0,
+        "w": 1,
+        "h": 0.1
+      },
+      "px": {
+        "x": 0,
+        "y": 0,
+        "w": 1440,
+        "h": 90
+      },
+      "aspect": 16,
+      "palette": [
+        {
+          "hex": "#273737",
+          "coverage": 0.5424
+        },
+        {
+          "hex": "#121322",
+          "coverage": 0.4418
+        },
+        {
+          "hex": "#c8d7d6",
+          "coverage": 0.0125
+        },
+        {
+          "hex": "#94842e",
+          "coverage": 0.0018
+        },
+        {
+          "hex": "#f89818",
+          "coverage": 0.0015
+        }
+      ],
+      "detail": {
+        "energy": 15.6178
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "st-intake",
+      "kind": "chrome",
+      "note": "Station 01 INTAKE panel: enamel body with corner bolt heads, stencil numeral 01, andon lamp. Code-drawn.",
+      "grid": "A1:C4",
+      "codeDrawn": true,
+      "box": {
+        "x": 0,
+        "y": 0.1,
+        "w": 0.3,
+        "h": 0.4
+      },
+      "px": {
+        "x": 0,
+        "y": 90,
+        "w": 432,
+        "h": 360
+      },
+      "aspect": 1.2,
+      "palette": [
+        {
+          "hex": "#252535",
+          "coverage": 0.6163
+        },
+        {
+          "hex": "#0f0f0f",
+          "coverage": 0.2922
+        },
+        {
+          "hex": "#253535",
+          "coverage": 0.0869
+        },
+        {
+          "hex": "#f8b80c",
+          "coverage": 0.0033
+        },
+        {
+          "hex": "#788888",
+          "coverage": 0.0012
+        }
+      ],
+      "detail": {
+        "energy": 6.1632
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "intake-phone",
+      "kind": "chrome",
+      "note": "9:16 phone viewport: inset black screen with notch, red pulsing REC dot, and caption bar. Code-drawn, no imagery.",
+      "grid": "A2:B4",
+      "codeDrawn": true,
+      "box": {
+        "x": 0,
+        "y": 0.2,
+        "w": 0.2,
+        "h": 0.3
+      },
+      "px": {
+        "x": 0,
+        "y": 180,
+        "w": 288,
+        "h": 270
+      },
+      "aspect": 1.0667,
+      "palette": [
+        {
+          "hex": "#242434",
+          "coverage": 0.5899
+        },
+        {
+          "hex": "#0d0e0e",
+          "coverage": 0.4081
+        },
+        {
+          "hex": "#788888",
+          "coverage": 0.0011
+        },
+        {
+          "hex": "#c8c8c8",
+          "coverage": 0.0009
+        }
+      ],
+      "detail": {
+        "energy": 5.319
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "intake-form",
+      "kind": "control",
+      "note": "REEL TRANSCRIPT textarea and the WHY IT FITS THIS PERSONA input plate, with monospace labels. Code-drawn form controls.",
+      "grid": "B1:C4",
+      "codeDrawn": true,
+      "coverBox": {
+        "x": 0.1,
+        "y": 0.1,
+        "w": 0.2,
+        "h": 0.4
+      },
+      "box": {
+        "x": 0.1201,
+        "y": 0.2722,
+        "w": 0.1299,
+        "h": 0.0522
+      },
+      "px": {
+        "x": 173,
+        "y": 245,
+        "w": 187,
+        "h": 47
+      },
+      "aspect": 3.9787,
+      "palette": [
+        {
+          "hex": "#242434",
+          "coverage": 0.5047
+        },
+        {
+          "hex": "#181818",
+          "coverage": 0.4521
+        },
+        {
+          "hex": "#38607d",
+          "coverage": 0.02
+        },
+        {
+          "hex": "#67583f",
+          "coverage": 0.0137
+        },
+        {
+          "hex": "#6d7661",
+          "coverage": 0.0095
+        }
+      ],
+      "detail": {
+        "energy": 16.2441
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "st-analyzer",
+      "kind": "chrome",
+      "note": "Station 02 ANALYZER panel: enamel body, bolts, stencil numeral 02, andon lamp. Code-drawn.",
+      "grid": "D1:E4",
+      "codeDrawn": true,
+      "box": {
+        "x": 0.3,
+        "y": 0.1,
+        "w": 0.2,
+        "h": 0.4
+      },
+      "px": {
+        "x": 432,
+        "y": 90,
+        "w": 288,
+        "h": 360
+      },
+      "aspect": 0.8,
+      "palette": [
+        {
+          "hex": "#272737",
+          "coverage": 0.7655
+        },
+        {
+          "hex": "#243434",
+          "coverage": 0.2071
+        },
+        {
+          "hex": "#886918",
+          "coverage": 0.0102
+        },
+        {
+          "hex": "#f6b708",
+          "coverage": 0.0088
+        },
+        {
+          "hex": "#e84828",
+          "coverage": 0.0083
+        }
+      ],
+      "detail": {
+        "energy": 7.9171
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "hook-card",
+      "kind": "control",
+      "note": "Hook card: PATTERN-INTERRUPT chip on a bordered inset plate. Code-drawn.",
+      "grid": "D1:E2",
+      "codeDrawn": true,
+      "coverBox": {
+        "x": 0.3,
+        "y": 0.1,
+        "w": 0.2,
+        "h": 0.2
+      },
+      "box": {
+        "x": 0.3,
+        "y": 0.1067,
+        "w": 0.1167,
+        "h": 0.1733
+      },
+      "px": {
+        "x": 432,
+        "y": 96,
+        "w": 168,
+        "h": 156
+      },
+      "aspect": 1.0769,
+      "palette": [
+        {
+          "hex": "#252b35",
+          "coverage": 0.9345
+        },
+        {
+          "hex": "#896a19",
+          "coverage": 0.0423
+        },
+        {
+          "hex": "#f0b30b",
+          "coverage": 0.0154
+        },
+        {
+          "hex": "#c6692d",
+          "coverage": 0.005
+        },
+        {
+          "hex": "#58c848",
+          "coverage": 0.0029
+        }
+      ],
+      "detail": {
+        "energy": 9.9424
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "beat-timeline",
+      "kind": "control",
+      "note": "Three-row beat timeline with amber mono timestamps (0:00-0:03 hook, 0:03-0:18 setup, 0:18-0:28 payoff). Code-drawn.",
+      "grid": "D2:E3",
+      "codeDrawn": true,
+      "coverBox": {
+        "x": 0.3,
+        "y": 0.2,
+        "w": 0.2,
+        "h": 0.2
+      },
+      "box": {
+        "x": 0.3125,
+        "y": 0.2867,
+        "w": 0.0833,
+        "h": 0.0733
+      },
+      "px": {
+        "x": 450,
+        "y": 258,
+        "w": 120,
+        "h": 66
+      },
+      "aspect": 1.8182,
+      "palette": [
+        {
+          "hex": "#282838",
+          "coverage": 0.8137
+        },
+        {
+          "hex": "#e64628",
+          "coverage": 0.1215
+        },
+        {
+          "hex": "#ab3929",
+          "coverage": 0.0301
+        },
+        {
+          "hex": "#563238",
+          "coverage": 0.0231
+        },
+        {
+          "hex": "#76382a",
+          "coverage": 0.0116
+        }
+      ],
+      "detail": {
+        "energy": 5.5475
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "verdict-stamp",
+      "kind": "control",
+      "note": "Diagonal red REMIX rubber stamp, double-ruled border, rotated. Code-drawn, not a raster stamp image.",
+      "grid": "D3:E3",
+      "codeDrawn": true,
+      "coverBox": {
+        "x": 0.3,
+        "y": 0.3,
+        "w": 0.2,
+        "h": 0.1
+      },
+      "box": {
+        "x": 0.3125,
+        "y": 0.3,
+        "w": 0.0833,
+        "h": 0.06
+      },
+      "px": {
+        "x": 450,
+        "y": 270,
+        "w": 120,
+        "h": 54
+      },
+      "aspect": 2.2222,
+      "palette": [
+        {
+          "hex": "#282838",
+          "coverage": 0.7892
+        },
+        {
+          "hex": "#e74728",
+          "coverage": 0.1382
+        },
+        {
+          "hex": "#bc392b",
+          "coverage": 0.0342
+        },
+        {
+          "hex": "#563238",
+          "coverage": 0.0256
+        },
+        {
+          "hex": "#943828",
+          "coverage": 0.0128
+        }
+      ],
+      "detail": {
+        "energy": 6.0541
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "st-stylist",
+      "kind": "chrome",
+      "note": "Station 03 STYLIST panel: enamel body, bolts, stencil numeral 03, andon lamp. Code-drawn.",
+      "grid": "F1:F4",
+      "codeDrawn": true,
+      "box": {
+        "x": 0.5,
+        "y": 0.1,
+        "w": 0.1,
+        "h": 0.4
+      },
+      "px": {
+        "x": 720,
+        "y": 90,
+        "w": 144,
+        "h": 360
+      },
+      "aspect": 0.4,
+      "palette": [
+        {
+          "hex": "#262635",
+          "coverage": 0.918
+        },
+        {
+          "hex": "#273737",
+          "coverage": 0.0661
+        },
+        {
+          "hex": "#081818",
+          "coverage": 0.0077
+        },
+        {
+          "hex": "#f8b808",
+          "coverage": 0.0065
+        },
+        {
+          "hex": "#58c848",
+          "coverage": 0.0017
+        }
+      ],
+      "detail": {
+        "energy": 1.4184
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "garment-cells",
+      "kind": "control",
+      "note": "Three garment thumbnail placeholder cells (dress, gold, heels) each with a green/amber formality meter bar. Flat placeholder fills, code-drawn; real garment photos drop in here later as image regions.",
+      "grid": "F1:F3",
+      "codeDrawn": true,
+      "coverBox": {
+        "x": 0.5,
+        "y": 0.1,
+        "w": 0.1,
+        "h": 0.3
+      },
+      "box": {
+        "x": 0.575,
+        "y": 0.1067,
+        "w": 0.025,
+        "h": 0.0467
+      },
+      "px": {
+        "x": 828,
+        "y": 96,
+        "w": 36,
+        "h": 42
+      },
+      "aspect": 0.8571,
+      "palette": [
+        {
+          "hex": "#283838",
+          "coverage": 0.4259
+        },
+        {
+          "hex": "#282838",
+          "coverage": 0.2654
+        },
+        {
+          "hex": "#f8b709",
+          "coverage": 0.2407
+        },
+        {
+          "hex": "#c3b308",
+          "coverage": 0.037
+        },
+        {
+          "hex": "#a83238",
+          "coverage": 0.0309
+        }
+      ],
+      "detail": {
+        "energy": 4.6046
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "stylist-chips",
+      "kind": "control",
+      "note": "MDEP chips playful / casual / mall in amber mono. Code-drawn.",
+      "grid": "F4:F4",
+      "codeDrawn": true,
+      "coverBox": {
+        "x": 0.5,
+        "y": 0.4,
+        "w": 0.1,
+        "h": 0.1
+      },
+      "box": {
+        "x": 0.5,
+        "y": 0.42,
+        "w": 0.0208,
+        "h": 0.0267
+      },
+      "px": {
+        "x": 720,
+        "y": 378,
+        "w": 30,
+        "h": 24
+      },
+      "aspect": 1.25,
+      "palette": [
+        {
+          "hex": "#282838",
+          "coverage": 0.9241
+        },
+        {
+          "hex": "#a82838",
+          "coverage": 0.0253
+        },
+        {
+          "hex": "#c86030",
+          "coverage": 0.0253
+        },
+        {
+          "hex": "#883838",
+          "coverage": 0.0127
+        },
+        {
+          "hex": "#884828",
+          "coverage": 0.0127
+        }
+      ],
+      "detail": {
+        "energy": 2.7498
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "st-expression",
+      "kind": "chrome",
+      "note": "Station 04 EXPRESSION panel: enamel body, bolts, stencil numeral 04, andon lamp. Code-drawn.",
+      "grid": "G1:H4",
+      "codeDrawn": true,
+      "box": {
+        "x": 0.6,
+        "y": 0.1,
+        "w": 0.2,
+        "h": 0.4
+      },
+      "px": {
+        "x": 864,
+        "y": 90,
+        "w": 288,
+        "h": 360
+      },
+      "aspect": 0.8,
+      "palette": [
+        {
+          "hex": "#262636",
+          "coverage": 0.6422
+        },
+        {
+          "hex": "#f8e8d8",
+          "coverage": 0.2205
+        },
+        {
+          "hex": "#2a3a3c",
+          "coverage": 0.1298
+        },
+        {
+          "hex": "#f8b80c",
+          "coverage": 0.0057
+        },
+        {
+          "hex": "#98c8d8",
+          "coverage": 0.0019
+        }
+      ],
+      "detail": {
+        "energy": 10.8928
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "expression-dial",
+      "kind": "control",
+      "note": "Rotary expression dial: knurled rim, cap, amber indicator needle, mischievous_grin label. Code-drawn, no raster dial.",
+      "grid": "G1:H3",
+      "codeDrawn": true,
+      "coverBox": {
+        "x": 0.6,
+        "y": 0.1,
+        "w": 0.2,
+        "h": 0.3
+      },
+      "box": {
+        "x": 0.7174,
+        "y": 0.1089,
+        "w": 0.0826,
+        "h": 0.2911
+      },
+      "px": {
+        "x": 1033,
+        "y": 98,
+        "w": 119,
+        "h": 262
+      },
+      "aspect": 0.4542,
+      "palette": [
+        {
+          "hex": "#f8e8d8",
+          "coverage": 0.5919
+        },
+        {
+          "hex": "#282838",
+          "coverage": 0.3039
+        },
+        {
+          "hex": "#283838",
+          "coverage": 0.0808
+        },
+        {
+          "hex": "#f8b80a",
+          "coverage": 0.0141
+        },
+        {
+          "hex": "#cbe5d8",
+          "coverage": 0.0092
+        }
+      ],
+      "detail": {
+        "energy": 10.748
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "expression-lamps",
+      "kind": "control",
+      "note": "GENUINE (green, lit) and PERFORMED (dark) andon status lamps. Code-drawn.",
+      "grid": "G3:H4",
+      "codeDrawn": true,
+      "coverBox": {
+        "x": 0.6,
+        "y": 0.3,
+        "w": 0.2,
+        "h": 0.2
+      },
+      "box": {
+        "x": 0.7292,
+        "y": 0.3,
+        "w": 0.0708,
+        "h": 0.1667
+      },
+      "px": {
+        "x": 1050,
+        "y": 270,
+        "w": 102,
+        "h": 150
+      },
+      "aspect": 0.68,
+      "palette": [
+        {
+          "hex": "#f8e8d8",
+          "coverage": 0.8202
+        },
+        {
+          "hex": "#282838",
+          "coverage": 0.1523
+        },
+        {
+          "hex": "#97c8d7",
+          "coverage": 0.0106
+        },
+        {
+          "hex": "#f8dfa8",
+          "coverage": 0.0094
+        },
+        {
+          "hex": "#db8c44",
+          "coverage": 0.0075
+        }
+      ],
+      "detail": {
+        "energy": 11.896
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "st-dispatch",
+      "kind": "chrome",
+      "note": "Station 05 DISPATCH panel: enamel body, bolts, stencil numeral 05, andon lamp. Code-drawn.",
+      "grid": "I1:J4",
+      "codeDrawn": true,
+      "box": {
+        "x": 0.8,
+        "y": 0.1,
+        "w": 0.2,
+        "h": 0.4
+      },
+      "px": {
+        "x": 1152,
+        "y": 90,
+        "w": 288,
+        "h": 360
+      },
+      "aspect": 0.8,
+      "palette": [
+        {
+          "hex": "#f8e8d8",
+          "coverage": 0.5561
+        },
+        {
+          "hex": "#222232",
+          "coverage": 0.365
+        },
+        {
+          "hex": "#273737",
+          "coverage": 0.072
+        },
+        {
+          "hex": "#b83818",
+          "coverage": 0.0048
+        },
+        {
+          "hex": "#f8cc80",
+          "coverage": 0.002
+        }
+      ],
+      "detail": {
+        "energy": 10.2894
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "job-ticket",
+      "kind": "chrome",
+      "note": "Cream paper job ticket with torn top edge, PERSONA/HOOK/SCRIPT/EXPRESSION/CAPTION print, and a red REMIX stamp. Flat cream fill + code-drawn type and stamp; no paper-grain raster.",
+      "grid": "I1:J4",
+      "codeDrawn": true,
+      "box": {
+        "x": 0.8,
+        "y": 0.1,
+        "w": 0.2,
+        "h": 0.4
+      },
+      "px": {
+        "x": 1152,
+        "y": 90,
+        "w": 288,
+        "h": 360
+      },
+      "aspect": 0.8,
+      "palette": [
+        {
+          "hex": "#f8e8d8",
+          "coverage": 0.5561
+        },
+        {
+          "hex": "#222232",
+          "coverage": 0.365
+        },
+        {
+          "hex": "#273737",
+          "coverage": 0.072
+        },
+        {
+          "hex": "#b83818",
+          "coverage": 0.0048
+        },
+        {
+          "hex": "#f8cc80",
+          "coverage": 0.002
+        }
+      ],
+      "detail": {
+        "energy": 10.2894
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "conveyor-rail",
+      "kind": "chrome",
+      "note": "Horizontal steel conveyor beam crossing the full width with the glowing amber job token riding it. Code-drawn.",
+      "grid": "A5:J5",
+      "codeDrawn": true,
+      "box": {
+        "x": 0,
+        "y": 0.5,
+        "w": 1,
+        "h": 0.1
+      },
+      "px": {
+        "x": 0,
+        "y": 450,
+        "w": 1440,
+        "h": 90
+      },
+      "aspect": 16,
+      "palette": [
+        {
+          "hex": "#1a1a2a",
+          "coverage": 0.913
+        },
+        {
+          "hex": "#182828",
+          "coverage": 0.0527
+        },
+        {
+          "hex": "#383848",
+          "coverage": 0.0308
+        },
+        {
+          "hex": "#f89818",
+          "coverage": 0.0026
+        },
+        {
+          "hex": "#f8b858",
+          "coverage": 0.0009
+        }
+      ],
+      "detail": {
+        "energy": 3.2414
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "dial-bank",
+      "kind": "chrome",
+      "note": "Bottom control deck: four knurled MDEP dials (MOOD/DAY/ENVIRONMENT/PLACE) with amber needles and labels, hazard-tape top edge, green mono readout strip, and the amber RUN LINE button. All code-drawn.",
+      "grid": "A9:J9",
+      "codeDrawn": true,
+      "box": {
+        "x": 0,
+        "y": 0.9,
+        "w": 1,
+        "h": 0.1
+      },
+      "px": {
+        "x": 0,
+        "y": 810,
+        "w": 1440,
+        "h": 90
+      },
+      "aspect": 16,
+      "palette": [
+        {
+          "hex": "#192729",
+          "coverage": 0.7369
+        },
+        {
+          "hex": "#080818",
+          "coverage": 0.16
+        },
+        {
+          "hex": "#f8b837",
+          "coverage": 0.0738
+        },
+        {
+          "hex": "#384755",
+          "coverage": 0.0227
+        },
+        {
+          "hex": "#583818",
+          "coverage": 0.0067
+        }
+      ],
+      "detail": {
+        "energy": 15.856
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    }
+  ]
+}

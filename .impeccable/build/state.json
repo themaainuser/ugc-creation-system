@@ -1,0 +1,223 @@
+{
+  "tool": "build-phase",
+  "version": 2,
+  "startedAt": "2026-10-29T14:08:32.411Z",
+  "comp": ".impeccable/mocks/comp-conveyor.png",
+  "direction": "04160b28",
+  "breakpoint": "1440x900",
+  "artifact": null,
+  "phase": "hero",
+  "phases": {
+    "comps": {
+      "status": "closed",
+      "openedAt": "2026-10-29T14:08:32.411Z",
+      "closedAt": "2026-10-29T15:19:02.132Z",
+      "attempts": 6,
+      "notes": [],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "3 comps, 1 approved",
+        "approved": ".impeccable/mocks/comp-conveyor.png",
+        "at": "2026-10-29T15:19:02.132Z"
+      },
+      "forced": null
+    },
+    "spec": {
+      "status": "closed",
+      "openedAt": "2026-10-29T15:19:02.142Z",
+      "closedAt": "2026-10-29T15:22:48.584Z",
+      "attempts": 1,
+      "notes": [],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "19 regions, 1 plates, 0 text regions measured",
+        "at": "2026-10-29T15:22:48.583Z"
+      },
+      "forced": null
+    },
+    "plates": {
+      "status": "closed",
+      "openedAt": "2026-10-29T15:22:48.584Z",
+      "closedAt": "2026-10-29T15:23:48.166Z",
+      "attempts": 1,
+      "notes": [],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "1/1 plates",
+        "at": "2026-10-29T15:23:48.165Z"
+      },
+      "forced": null
+    },
+    "hero": {
+      "status": "open",
+      "openedAt": "2026-10-29T15:23:48.166Z",
+      "closedAt": null,
+      "attempts": 0,
+      "notes": [],
+      "gate": {
+        "ok": false,
+        "reasons": [
+          "hero overall 58.6% < 72% (structure 66%, color 63%, detail 37%)",
+          "region intake-phone is missing (detail 1%, structure 61%): the comp shows material the build does not",
+          "region hook-card is missing (detail 9%, structure 72%): the comp shows material the build does not",
+          "region beat-timeline is missing (detail 0%, structure 73%): the comp shows material the build does not",
+          "region verdict-stamp is missing (detail 0%, structure 72%): the comp shows material the build does not",
+          "region st-stylist is missing (detail 4%, structure 92%): the comp shows material the build does not",
+          "region garment-cells is missing (detail 5%, structure 72%): the comp shows material the build does not",
+          "region stylist-chips is missing (detail 0%, structure 94%): the comp shows material the build does not",
+          "region st-expression is missing (detail 9%, structure 65%): the comp shows material the build does not",
+          "region expression-dial is missing (detail 5%, structure 44%): the comp shows material the build does not",
+          "region expression-lamps is missing (detail 2%, structure 32%): the comp shows material the build does not",
+          "region st-dispatch is missing (detail 0%, structure 44%): the comp shows material the build does not",
+          "region job-ticket is missing (detail 0%, structure 44%): the comp shows material the build does not",
+          "region conveyor-rail is missing (detail 5%, structure 92%): the comp shows material the build does not",
+          "region intake-form (control) is contradicted (structure 40%, detail added 18%): this control does not read as the comp's: rebuild its chrome from the crop (border, fill, radius, chevron or arrow, label size) rather than from a component default",
+          "READINGS, each one CSS edit (2):",
+          "chrome header-band: its rule sits 61px into the box in the comp and 12px in the build (-49px), so the strip is shorter than the comp's; match the height, not only the position",
+          "control intake-form: its rule sits 31px into the box in the comp and 43px in the build (+12px), so the strip is taller than the comp's; match the height, not only the position"
+        ],
+        "summary": "hero 59% (contradicted)",
+        "score": 0.5861,
+        "verdict": "contradicted",
+        "report": ".impeccable/review/diff/hero/report.json",
+        "sideBySide": "C:/Users/Kartik/OneDrive/Desktop/New folder/.impeccable/review/diff/hero/side-by-side.png",
+        "worst": [
+          "expression-lamps missing 20%",
+          "st-dispatch missing 29%",
+          "job-ticket missing 29%"
+        ],
+        "worstIds": [
+          "expression-lamps",
+          "st-dispatch",
+          "job-ticket"
+        ],
+        "worstCrops": [
+          {
+            "id": "expression-lamps",
+            "verdict": "missing",
+            "score": {
+              "overall": 0.199,
+              "structure": 0.3215,
+              "color": 0.1455,
+              "colorIntersection": 0.1399,
+              "paletteMatch": 0.1485,
+              "detail": 0.017,
+              "detailRaw": 0.017,
+              "detailAdded": 0,
+              "bands": 0.4
+            },
+            "file": ".impeccable/review/diff/hero/regions/expression-lamps.png"
+          },
+          {
+            "id": "st-dispatch",
+            "verdict": "missing",
+            "score": {
+              "overall": 0.2943,
+              "structure": 0.4378,
+              "color": 0.5641,
+              "colorIntersection": 0.3255,
+              "paletteMatch": 0.6926,
+              "detail": 0,
+              "detailRaw": 0.0647,
+              "detailAdded": 0.1458,
+              "bands": 0
+            },
+            "file": ".impeccable/review/diff/hero/regions/st-dispatch.png"
+          },
+          {
+            "id": "job-ticket",
+            "verdict": "missing",
+            "score": {
+              "overall": 0.2943,
+              "structure": 0.4378,
+              "color": 0.5641,
+              "colorIntersection": 0.3255,
+              "paletteMatch": 0.6926,
+              "detail": 0,
+              "detailRaw": 0.0647,
+              "detailAdded": 0.1458,
+              "bands": 0
+            },
+            "file": ".impeccable/review/diff/hero/regions/job-ticket.png"
+          }
+        ],
+        "regionVerdicts": {
+          "factory-ground": "drift",
+          "header-band": "drift",
+          "st-intake": "drift",
+          "intake-phone": "missing",
+          "intake-form": "contradicted",
+          "st-analyzer": "drift",
+          "hook-card": "missing",
+          "beat-timeline": "missing",
+          "verdict-stamp": "missing",
+          "st-stylist": "missing",
+          "garment-cells": "missing",
+          "stylist-chips": "missing",
+          "st-expression": "missing",
+          "expression-dial": "missing",
+          "expression-lamps": "missing",
+          "st-dispatch": "missing",
+          "job-ticket": "missing",
+          "conveyor-rail": "missing",
+          "dial-bank": "drift"
+        },
+        "at": "2026-10-29T15:27:36.537Z"
+      },
+      "forced": null,
+      "readingsSeen": {
+        "chrome header-band: its rule sits 61px into the box in the comp and 55px in the build (-6px), so the strip is shorter than the comp's; match the height, not only the position": 1,
+        "chrome header-band: its rule sits 61px into the box in the comp and 12px in the build (-49px), so the strip is shorter than the comp's; match the height, not only the position": 1,
+        "control intake-form: its rule sits 31px into the box in the comp and 43px in the build (+12px), so the strip is taller than the comp's; match the height, not only the position": 1
+      },
+      "records": 2
+    },
+    "sections": {
+      "status": "pending",
+      "openedAt": null,
+      "closedAt": null,
+      "attempts": 0,
+      "notes": [],
+      "gate": null,
+      "forced": null
+    },
+    "motion": {
+      "status": "pending",
+      "openedAt": null,
+      "closedAt": null,
+      "attempts": 0,
+      "notes": [],
+      "gate": null,
+      "forced": null
+    },
+    "responsive": {
+      "status": "pending",
+      "openedAt": null,
+      "closedAt": null,
+      "attempts": 0,
+      "notes": [],
+      "gate": null,
+      "forced": null
+    },
+    "review": {
+      "status": "pending",
+      "openedAt": null,
+      "closedAt": null,
+      "attempts": 0,
+      "notes": [],
+      "gate": null,
+      "forced": null
+    }
+  },
+  "finish": null,
+  "plates": {
+    "factory-ground": {
+      "status": "ok",
+      "score": 0.4894,
+      "size": "1440x270"
+    }
+  }
+}
