@@ -9,11 +9,11 @@ Commands:
   plan-day {...}      → {style, expressions, decisions}
   line {...}          → {analysis, decision, brief}
   save-brief {brief}  → writes data/briefs/{persona}_{date}.json + cooldown log
-  health              → {"ok":true,"jev":bool,"llm":bool,"assets":n,"personas":n}
+  health              → {"ok":true,"jev":bool,"llm":bool,"models":{...},"assets":n,"personas":n}
   outcome {...}       → log Brier-scored outcome, returns {"brier":x}
 """
 from __future__ import annotations
-import json, sys
+import json, re, sys
 from datetime import date
 from pathlib import Path
 import yaml
@@ -21,7 +21,52 @@ import yaml
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
-from ugc_system.core.models import MDEP, Persona, Verdict
+
+def _parse_env_file(text: str) -> dict[str, str]:
+    """KEY=VALUE lines; ' //' starts an inline comment (URLs keep their //)."""
+    vals: dict[str, str] = {}
+    for line in text.splitlines():
+        line = re.split(r"\s+//", line, maxsplit=1)[0].strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, _, v = line.partition("=")
+        vals[k.strip()] = v.strip()
+    return vals
+
+
+def _load_env() -> None:
+    """Map the OpenRouter .env onto the engine's env contract.
+
+    One OpenRouter key drives both services:
+      Jev      → JEV_DECISIONS_URL / JEV_API_KEY / JEV_MODEL
+      Crouton  → UGC_LLM_API_KEY / UGC_LLM_BASE_URL / UGC_LLM_MODEL
+    Real environment variables always win (setdefault).
+    """
+    import os
+    env_file = ROOT / ".env"
+    if not env_file.exists():
+        return
+    vals = _parse_env_file(env_file.read_text(encoding="utf-8"))
+    key = vals.get("OPEN_ROUTER_API_KEY", "")
+    if key:
+        os.environ.setdefault("JEV_API_KEY", key)
+        os.environ.setdefault("UGC_LLM_API_KEY", key)
+    if vals.get("OPEN_ROUTER_JEV_BASE_URL"):
+        os.environ.setdefault("JEV_DECISIONS_URL", vals["OPEN_ROUTER_JEV_BASE_URL"])
+    if vals.get("OPEN_ROUTER_MODEL"):
+        os.environ.setdefault("JEV_MODEL", vals["OPEN_ROUTER_MODEL"])
+    if vals.get("OPEN_ROUTER_BASE_URL"):
+        os.environ.setdefault(
+            "UGC_LLM_BASE_URL",
+            re.sub(r"/chat/completions/?$", "", vals["OPEN_ROUTER_BASE_URL"]))
+    # Prompt generation / typing LLM: free stealth preview on OpenRouter.
+    os.environ.setdefault("UGC_LLM_MODEL",
+                          vals.get("UGC_LLM_MODEL") or "stealth/crouton-alpha")
+
+
+_load_env()
+
+from ugc_system.core.models import MDEP, Persona, ReelAnalysis, Verdict
 from ugc_system.core import decisions
 from ugc_system.engines import asset_library, expressions, stylist, reel_analyzer
 from ugc_system.orchestrator import USAGE_LOG, build_brief, escalation_list, log_usage
@@ -53,6 +98,28 @@ def _clean(obj):
         return obj[len(str(ROOT))+1:].replace("\\","/")
     return obj
 
+def _echo_analysis(d) -> ReelAnalysis | None:
+    """Rebuild the analysis the UI already computed for this line.
+    A bad/absent echo just means recompute — never an error."""
+    if not isinstance(d, dict):
+        return None
+    try:
+        return ReelAnalysis.from_dict(d)
+    except Exception as e:
+        print(f"[bridge] analysis echo unusable ({type(e).__name__}: {e}) "
+              f"— recomputing", file=sys.stderr)
+        return None
+
+def _echo_decision(d) -> decisions.Decision | None:
+    if not isinstance(d, dict):
+        return None
+    try:
+        return decisions.Decision.from_dict(d)
+    except Exception as e:
+        print(f"[bridge] verdict decision echo unusable ({type(e).__name__}: {e})"
+              f" — recomputing", file=sys.stderr)
+        return None
+
 def handle(cmd: str, payload: dict):
     if cmd == "personas":
         out = []
@@ -67,9 +134,15 @@ def handle(cmd: str, payload: dict):
 
     if cmd == "health":
         import os
+        jev = bool(os.environ.get("JEV_DECISIONS_URL") or os.environ.get("JEV_BASE_URL"))
+        llm = bool(os.environ.get("UGC_LLM_API_KEY"))
         return {"ok": True,
-                "jev": bool(os.environ.get("JEV_BASE_URL")),
-                "llm": bool(os.environ.get("UGC_LLM_API_KEY")),
+                "jev": jev,
+                "llm": llm,
+                "models": {
+                    "jev": os.environ.get("JEV_MODEL", "") if jev else None,
+                    "llm": os.environ.get("UGC_LLM_MODEL", "") if llm else None,
+                },
                 "assets": len(_assets()),
                 "personas": len(list(PERSONAS_DIR.glob("*.yaml")))}
 
@@ -93,6 +166,9 @@ def handle(cmd: str, payload: dict):
         hook_text = payload.get("hook_text", "")
         verdict = payload.get("verdict", "remix")
         hook_type = payload.get("hook_type", "")
+        # The verdict decision rides along so the engine composes the full
+        # escalation list (verdict included) — the UI only filters by locks.
+        vd = _echo_decision(payload.get("verdict_decision"))
         style = stylist.plan(_assets(), persona, mdep)
         expr = expressions.plan(persona, mdep, hook_text=hook_text,
                                 verdict=verdict, hook_type=hook_type)
@@ -101,14 +177,18 @@ def handle(cmd: str, payload: dict):
         return {"style": _clean(style), "expressions": _clean(expr),
                 "decisions": {"outfit": _clean(outfit_d), "expression": _clean(expr_d)},
                 "escalations": escalation_list(
-                    None, outfit_d, expr_d, wardrobe_empty=not _assets())}
+                    vd, outfit_d, expr_d, wardrobe_empty=not _assets())}
 
     if cmd in ("brief", "line"):
         persona = _persona(payload["persona"]); mdep = _mdep(payload.get("mdep"))
         transcript = payload.get("transcript",""); context = payload.get("context","")
         mode = Verdict(payload["mode"]) if payload.get("mode") else None
-        analysis = dec = None
-        if transcript:
+        # Analysis echo: the UI already ran `analyze` for this line — reuse it
+        # so one analysis shapes both the Analyzer station and this brief, and
+        # the LLM/Jev are not paid for twice. Both echo or neither.
+        analysis = _echo_analysis(payload.get("analysis"))
+        dec = _echo_decision(payload.get("verdict_decision"))
+        if transcript and (analysis is None or dec is None):
             analysis, dec = reel_analyzer.decision_for(transcript, context, persona.niche)
         brief = build_brief(persona, mdep, transcript=transcript, context=context,
                             idea=payload.get("idea",""), assets=_assets(), mode=mode,

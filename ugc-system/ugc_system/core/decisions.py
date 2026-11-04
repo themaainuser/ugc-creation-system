@@ -15,6 +15,7 @@ import json
 import math
 import os
 import random
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -68,6 +69,30 @@ class Decision:
             ],
         }
 
+    @classmethod
+    def from_dict(cls, d: dict) -> "Decision":
+        """Rebuild from the wire dict — the decision echo the UI sends back
+        with `brief`, so the JEV card and the ticket share one decision."""
+        opts = [
+            OptionScore(
+                name=str(o.get("name", "")),
+                raw_score=float(o.get("raw", 0.0)),
+                p_calibrated=float(o.get("p", 0.0)),
+                signals=list(o.get("signals", [])),
+            )
+            for o in d.get("options", [])
+        ]
+        return cls(
+            verb=str(d.get("verb", "")),
+            options=opts,
+            chosen=str(d.get("chosen", "")),
+            confidence=float(d.get("confidence", 0.0)),
+            gate=str(d.get("gate", "escalate")),
+            rationale=str(d.get("rationale", "")),
+            brier_estimate=float(d.get("brier_estimate", 0.0)),
+            calibrated=bool(d.get("calibrated", True)),
+        )
+
 
 def _platt(raw: float, a: float = 1.1, b: float = 0.05) -> float:
     """Sigmoid Platt scaling: maps a raw logit/score to calibrated probability."""
@@ -119,32 +144,107 @@ def _brier_estimate(confidence: float, n: int) -> float:
     return ((1.0 - confidence) ** 2 + (confidence ** 2) * (n - 1) / n) / n
 
 
-_JEV_BASE = os.environ.get("JEV_BASE_URL", "").rstrip("/")
-_JEV_MODEL = os.environ.get("JEV_MODEL", "jev-1.0")
+# ---------------------------------------------------------------- remote JEV
+# Env is read at call time (not import time) so .env loading order never
+# matters. Two surfaces, both speaking to TypeSafe's Jev:
+#
+#   JEV_DECISIONS_URL  OpenRouter Decisions API, e.g.
+#                      https://openrouter.ai/api/alpha/decisions
+#                      POST {model, state, questions} →
+#                      {answers:{decision:{type:"choice", choice,
+#                        probabilities:{name:p}, confidence}}}
+#   JEV_BASE_URL       legacy TypeSafe System One (SDK-compatible)
+#                      POST {base}/v1/systemone {model, verb, options, input}
+#                      → {probabilities:{name:p}}
+_JEV_INSTRUCTIONS = {
+    "verdict": ("Which verdict is the right call for this reel: recreate "
+                "(keep the original structure) or remix (adapt it)?"),
+    "outfit": ("Which outfit is the best wardrobe call for this mood, "
+               "place, and day?"),
+    "expression": ("Which expression is the best performance call for "
+                   "this hook and mood?"),
+}
+
+
+def _env(name: str, default: str = "") -> str:
+    return os.environ.get(name, default).strip()
+
+
+def _post_json(url: str, body: dict, timeout: float = 12.0) -> dict:
+    import urllib.request
+    req = urllib.request.Request(
+        url, data=json.dumps(body).encode(),
+        headers={"Content-Type": "application/json",
+                 "Authorization": f"Bearer {_env('JEV_API_KEY')}"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.loads(r.read().decode())
+
+
+def _normalise(probs: dict, options: list[str]) -> dict[str, float] | None:
+    """Keep option keys only, floor at 0, renormalise to sum 1.
+    None when nothing usable came back (caller falls back to local)."""
+    clean: dict[str, float] = {}
+    for k, v in probs.items():
+        if k in options:
+            try:
+                clean[k] = max(0.0, float(v))
+            except (TypeError, ValueError):
+                continue
+    for n in options:
+        clean.setdefault(n, 0.0)
+    total = sum(clean.values())
+    if total <= 0:
+        return None
+    return {k: v / total for k, v in clean.items()}
 
 
 def _jev_remote(verb: str, options: list[str], payload: dict) -> dict[str, float] | None:
-    """Try remote JEV (hosted RLCD model) if configured; None → fall back to local scorer.
-    Expects POST /v1/systemone {model, verb, options, input} → {probabilities:{name:p}}.
+    """Remote JEV (hosted TypeSafe Jev) when configured; None → local scorer.
+
+    The Decisions API is a typed Choice question: `state` is the decision
+    context, `criteria` names the options, and Jev returns a calibrated
+    probability per option — the same distribution shape the local Platt
+    path produces, so everything downstream is unchanged.
     """
-    if not _JEV_BASE:
-        return None
-    try:
-        import urllib.request
-        body = json.dumps({
-            "model": _JEV_MODEL, "verb": verb, "options": options, "input": payload,
-        }).encode()
-        req = urllib.request.Request(f"{_JEV_BASE}/v1/systemone", data=body,
-                                     headers={"Content-Type": "application/json",
-                                              "Authorization": f"Bearer {os.environ.get('JEV_API_KEY','')}"})
-        with urllib.request.urlopen(req, timeout=8) as r:
-            data = json.loads(r.read().decode())
-        probs = data.get("probabilities") or data.get("probs") or {}
-        # normalise
-        total = sum(float(v) for v in probs.values()) or 1.0
-        return {k: float(v) / total for k, v in probs.items() if k in options}
-    except Exception:
-        return None
+    url = _env("JEV_DECISIONS_URL")
+    if url:
+        try:
+            data = _post_json(url, {
+                "model": _env("JEV_MODEL", "typesafe/jev-1.14"),
+                "state": payload,
+                "questions": {"decision": {
+                    "type": "choice",
+                    "instructions": _JEV_INSTRUCTIONS.get(
+                        verb, f"Which {verb.replace('_', ' ')} option is the "
+                              f"best call for this context?"),
+                    "criteria": {n: n.replace("_", " ") for n in options},
+                }},
+            })
+            ans = ((data or {}).get("answers") or {}).get("decision") or {}
+            probs = ans.get("probabilities")
+            if not isinstance(probs, dict) or not probs:
+                return None
+            return _normalise(probs, options)
+        except Exception as e:
+            print(f"[jev] decisions api failed ({type(e).__name__}: {e}) "
+                  f"— falling back to local scorer", file=sys.stderr)
+            return None
+
+    base = _env("JEV_BASE_URL").rstrip("/")
+    if base:
+        try:
+            data = _post_json(
+                f"{base}/v1/systemone",
+                {"model": _env("JEV_MODEL", "jev-1.0"), "verb": verb,
+                 "options": options, "input": payload},
+                timeout=8.0)
+            probs = data.get("probabilities") or data.get("probs") or {}
+            return _normalise(probs, options)
+        except Exception as e:
+            print(f"[jev] systemone failed ({type(e).__name__}: {e}) "
+                  f"— falling back to local scorer", file=sys.stderr)
+            return None
+    return None
 
 
 def decide(verb: str, options: dict[str, float] | list[str],
@@ -178,13 +278,16 @@ def decide(verb: str, options: dict[str, float] | list[str],
         chosen = max(remote, key=remote.get)
         conf = remote[chosen]
         gate = "automate" if conf >= threshold else "escalate"
+        model = _env("JEV_MODEL", "jev") or "jev"
         return Decision(
             verb=verb,
             options=[OptionScore(n, raw_scores.get(n, 0.0), remote[n], signals_map.get(n, []))
                      for n in sorted(remote, key=remote.get, reverse=True)],
             chosen=chosen, confidence=conf, gate=gate,
-            rationale=f"Remote JEV (hosted): P({chosen})={conf:.2f} ≥{threshold} → {gate}.",
+            rationale=(f"Remote JEV ({model}): P({chosen})={conf:.2f} → {gate} "
+                       f"(≥{threshold} to automate)."),
             brier_estimate=_brier_estimate(conf, len(remote)),
+            calibrated=True,
         )
 
     # 2. Local heuristic fallback: Platt applied to raw scores (logits) once,

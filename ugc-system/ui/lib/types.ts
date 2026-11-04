@@ -46,6 +46,7 @@ export interface Health {
   ok: boolean;
   jev: boolean;
   llm: boolean;
+  models?: { jev?: string | null; llm?: string | null };
   assets: number;
   personas: number;
 }

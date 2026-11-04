@@ -258,15 +258,20 @@ def analyze(transcript: str, context: str = "", persona_niche: str = "") -> Reel
             f"Persona niche: {persona_niche or 'lifestyle'}\n\nTranscript:\n{transcript}")
     raw = llm.analyze_text_or_none(SYSTEM, user)
     if raw:
-        data = json.loads(raw)
-        h, e = data["hook"], data["ending"]
-        return ReelAnalysis(
-            source=transcript[:60], hook=Hook(**h),
-            beats=[Beat(**b) for b in data["beats"]],
-            ending=Ending(**e), verdict=Verdict(data["verdict"]),
-            verdict_reason=data.get("verdict_reason", ""), user_context=context,
-            remix_ideas=data.get("remix_ideas", []), niche_tags=data.get("niche_tags", []),
-        )
+        try:
+            data = json.loads(raw)
+            h, e = data["hook"], data["ending"]
+            return ReelAnalysis(
+                source=transcript[:60], hook=Hook(**h),
+                beats=[Beat(**b) for b in data["beats"]],
+                ending=Ending(**e), verdict=Verdict(data["verdict"]),
+                verdict_reason=data.get("verdict_reason", ""), user_context=context,
+                remix_ideas=data.get("remix_ideas", []), niche_tags=data.get("niche_tags", []),
+            )
+        except Exception as e:
+            import sys
+            print(f"[reel_analyzer] LLM output unusable ({type(e).__name__}: {e})"
+                  f" — heuristic fallback", file=sys.stderr)
     return _heuristic(transcript, context, persona_niche)
 
 

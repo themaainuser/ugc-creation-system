@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 
 
 class LLMUnavailable(Exception):
@@ -46,7 +47,14 @@ def analyze_text(system: str, user: str, *, expect_json: bool = True,
 
 
 def analyze_text_or_none(system: str, user: str, **kw) -> str | None:
+    """None when unconfigured *or* when the provider fails (bad key, network,
+    unsupported response_format…) — the deterministic heuristic takes over
+    either way, so the pipeline never dies on an LLM hiccup."""
     try:
         return analyze_text(system, user, **kw)
     except LLMUnavailable:
+        return None
+    except Exception as e:
+        print(f"[llm] {type(e).__name__}: {e} — heuristic fallback",
+              file=sys.stderr)
         return None

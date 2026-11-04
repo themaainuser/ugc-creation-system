@@ -108,6 +108,23 @@ class ReelAnalysis:
     remix_ideas: list[str] = field(default_factory=list)
     niche_tags: list[str] = field(default_factory=list)
 
+    @classmethod
+    def from_dict(cls, d: dict) -> "ReelAnalysis":
+        """Rebuild from the wire dict — the analysis echo the UI sends back
+        with `brief`, so one analysis shapes both the Analyzer station and
+        the Content Brief (and the LLM is never paid for twice)."""
+        return cls(
+            source=d.get("source", ""),
+            hook=Hook(**d["hook"]),
+            beats=[Beat(**b) for b in d.get("beats", [])],
+            ending=Ending(**d["ending"]),
+            verdict=Verdict(d["verdict"]),
+            verdict_reason=d.get("verdict_reason", ""),
+            user_context=d.get("user_context", ""),
+            remix_ideas=list(d.get("remix_ideas", [])),
+            niche_tags=list(d.get("niche_tags", [])),
+        )
+
 
 # ---------------------------------------------------------------- Styling
 

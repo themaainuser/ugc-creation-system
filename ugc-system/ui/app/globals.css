@@ -142,7 +142,7 @@ button { font: inherit; }
 
 .brand-mode {
   font-family: var(--font-mono), monospace;
-  font-size: 10px;
+  font-size: 10.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--accent);
@@ -156,7 +156,7 @@ button { font: inherit; }
 
 .persona-label {
   font-family: var(--font-mono), monospace;
-  font-size: 10px;
+  font-size: 10.5px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--faint);
@@ -363,7 +363,7 @@ button { font: inherit; }
 
 .status-pill {
   font-family: var(--font-mono), monospace;
-  font-size: 10px;
+  font-size: 10.5px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   padding: 3px 9px;
@@ -799,7 +799,7 @@ button { font: inherit; }
 .jev-lockrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
 .lock-stamp {
-  font-size: 10px;
+  font-size: 10.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--accent);

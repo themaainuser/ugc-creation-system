@@ -142,37 +142,29 @@ function mergeBrief(prev: Brief | null, incoming: Brief, locks: ConsoleState["lo
   };
 }
 
-/** Same rule + wording as orchestrator.escalation_list, over *effective* decisions.
-    Locked verbs are resolved (the operator made the call), so they drop out. */
-function deriveEscalations(brief: Brief, locks: ConsoleState["locks"], incoming: string[]): string[] {
-  const out: string[] = [];
-  for (const verb of DECISION_VERBS) {
-    if (locks[verb]) continue;
-    const d = brief.decisions[verb];
-    if (d && d.gate === "escalate") {
-      out.push(`${verb}: P(${d.chosen})=${d.confidence.toFixed(2)} → escalate`);
-    }
-  }
-  // keep engine-raised entries that are not per-decision (e.g. wardrobe).
-  // Case-insensitive so a Python label change can't double-list a line.
-  for (const e of incoming) {
+/** Engine lines that are still open under the current locks: a locked verb's
+    line drops out (the operator made the call), everything else — including
+    non-decision lines like `wardrobe:` — stays. Wording is the engine's
+    verbatim; this is a filter, never a re-write (single source of truth). */
+function visibleEscalations(brief: Brief | null, locks: ConsoleState["locks"]): string[] {
+  if (!brief) return [];
+  return brief.escalations.filter((e) => {
     const head = e.split(":")[0].trim().toLowerCase();
-    if (!DECISION_VERBS.includes(head as DecisionVerb)) out.push(e);
-  }
-  return out;
+    if (DECISION_VERBS.includes(head as DecisionVerb) && locks[head as DecisionVerb]) {
+      return false;
+    }
+    return true;
+  });
 }
 
-/** Apply a new lock set: re-derive escalations (locked verbs resolve) and
-    prune acknowledgements that no longer apply. */
+/** Apply a new lock set: keep engine escalations verbatim, prune
+    acknowledgements that no longer apply so an unlock re-opens the line. */
 function applyLocks(state: ConsoleState, locks: ConsoleState["locks"]): ConsoleState {
-  if (!state.brief) return { ...state, locks };
-  const brief = { ...state.brief };
-  brief.escalations = deriveEscalations(brief, locks, state.brief.escalations);
+  const visible = visibleEscalations(state.brief, locks);
   return {
     ...state,
     locks,
-    brief,
-    ackedEscalations: state.ackedEscalations.filter((t) => brief.escalations.includes(t)),
+    ackedEscalations: state.ackedEscalations.filter((t) => visible.includes(t)),
   };
 }
 
@@ -242,7 +234,8 @@ export function reducer(state: ConsoleState, action: Action): ConsoleState {
       // (persona switch) — phase is only running/overriding during a build.
       if (state.phase !== "running" && state.phase !== "overriding") return state;
       const brief = mergeBrief(state.brief, action.brief, state.locks);
-      brief.escalations = deriveEscalations(brief, state.locks, action.brief.escalations);
+      // brief.escalations stays the engine's verbatim list — locks filter it
+      // at read time (openEscalations), so wording never lives in the UI.
       return {
         ...state,
         brief,
@@ -252,7 +245,8 @@ export function reducer(state: ConsoleState, action: Action): ConsoleState {
         verdictDecision: brief.decisions.verdict ?? state.verdictDecision,
         phase: "ready",
         activeStage: null,
-        ackedEscalations: state.ackedEscalations.filter((t) => brief.escalations.includes(t)),
+        ackedEscalations: state.ackedEscalations.filter((t) =>
+          visibleEscalations(brief, state.locks).includes(t)),
       };
     }
 
@@ -294,15 +288,17 @@ export function reducer(state: ConsoleState, action: Action): ConsoleState {
           outfit: state.locks.outfit ? state.brief.decisions.outfit : action.decisions.outfit,
           expression: state.locks.expression ? state.brief.decisions.expression : action.decisions.expression,
         },
-        escalations: [],
+        // plan-day returns the engine's full escalation list (verdict
+        // included) — stored verbatim, filtered by locks at read time.
+        escalations: action.escalations,
       };
-      merged.escalations = deriveEscalations(merged, state.locks, action.escalations);
       return {
         ...state,
         brief: merged,
         phase: "ready",
         activeStage: null,
-        ackedEscalations: state.ackedEscalations.filter((t) => merged.escalations.includes(t)),
+        ackedEscalations: state.ackedEscalations.filter((t) =>
+          visibleEscalations(merged, state.locks).includes(t)),
       };
     }
 
@@ -382,7 +378,7 @@ export function reducer(state: ConsoleState, action: Action): ConsoleState {
 /* ------------------------------------------------------------- selectors */
 
 export const openEscalations = (s: ConsoleState): string[] =>
-  (s.brief?.escalations ?? []).filter((e) => !s.ackedEscalations.includes(e));
+  visibleEscalations(s.brief, s.locks).filter((e) => !s.ackedEscalations.includes(e));
 
 export const canRun = (s: ConsoleState): boolean =>
   Boolean(

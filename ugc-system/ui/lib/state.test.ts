@@ -23,28 +23,45 @@ const analysis: Analysis = {
   verdict: "remix", verdict_reason: "r", remix_ideas: [], niche_tags: [],
 };
 
-const mkBrief = (opts: { vGate?: "automate" | "escalate"; oGate?: "automate" | "escalate"; mode?: "remix" | "recreate" } = {}): Brief => ({
-  persona_id: "aria",
-  mdep: { mood: "playful", day: "casual weekday", environment: "mall", place: "mall" },
-  mode: opts.mode ?? "remix",
-  hook: "hook text",
-  script_outline: ["0:00 [hook] h"],
-  style: {
-    outfit: { items: [], jewelry: null, footwear: null, rationale: "r" },
-    pose: { poses: ["stance"], shot_notes: "" }, location_notes: "",
-  },
-  expressions: {
-    primary: { name: "genuine_smile", genuine: true, when_to_use: "", micro_details: "" },
-    secondary: [], avoid: [], audio_note: "", rationale: "",
-  },
-  caption_idea: "c", hashtags: ["#a"],
-  decisions: {
-    verdict: decision("verdict", "remix", opts.vGate ?? "automate", 0.8),
-    outfit: decision("outfit", "dress", opts.oGate ?? "automate", 0.75),
-    expression: decision("expression", "genuine_smile", "automate", 0.9),
-  },
-  escalations: [],
-});
+/** Engine-style escalation lines: the wording lives in the Python engine
+    (orchestrator.escalation_list) and arrives verbatim — the fixtures
+    mirror it so the UI's filter-only behaviour is tested against reality. */
+const engineLines = (b: Pick<Brief, "decisions">, extra: string[] = []): string[] => [
+  ...(["verdict", "outfit", "expression"] as const)
+    .filter((v) => b.decisions[v]?.gate === "escalate")
+    .map((v) => {
+      const d = b.decisions[v]!;
+      return `${v}: P(${d.chosen})=${d.confidence.toFixed(2)} → escalate`;
+    }),
+  ...extra,
+];
+
+const mkBrief = (opts: { vGate?: "automate" | "escalate"; oGate?: "automate" | "escalate"; mode?: "remix" | "recreate"; extra?: string[] } = {}): Brief => {
+  const b: Brief = {
+    persona_id: "aria",
+    mdep: { mood: "playful", day: "casual weekday", environment: "mall", place: "mall" },
+    mode: opts.mode ?? "remix",
+    hook: "hook text",
+    script_outline: ["0:00 [hook] h"],
+    style: {
+      outfit: { items: [], jewelry: null, footwear: null, rationale: "r" },
+      pose: { poses: ["stance"], shot_notes: "" }, location_notes: "",
+    },
+    expressions: {
+      primary: { name: "genuine_smile", genuine: true, when_to_use: "", micro_details: "" },
+      secondary: [], avoid: [], audio_note: "", rationale: "",
+    },
+    caption_idea: "c", hashtags: ["#a"],
+    decisions: {
+      verdict: decision("verdict", "remix", opts.vGate ?? "automate", 0.8),
+      outfit: decision("outfit", "dress", opts.oGate ?? "automate", 0.75),
+      expression: decision("expression", "genuine_smile", "automate", 0.9),
+    },
+    escalations: [],
+  };
+  b.escalations = engineLines(b, opts.extra);
+  return b;
+};
 
 const draft = (over: Partial<Draft> = {}): Draft => ({
   personaId: "aria", transcript: "t", context: "", idea: "",
@@ -73,23 +90,28 @@ ok("stale runId ignored", reducer(s, { type: "BRIEF_OK", runId: 99, brief: mkBri
 const escs = openEscalations(s);
 ok("escalate gate → escalation line", escs.some((e) => e.startsWith("verdict:")), JSON.stringify(escs));
 
-// 4. lock outfit → redress keeps locked half, drops escalation for locked verb
+// 4. lock outfit → redress keeps locked half, engine lines filter by lock
 s = reducer(s, { type: "LOCK_SET", verb: "outfit", lock: { choice: "dress", modelChoice: "dress", modelP: 0.75, overridden: false, at: 1 } });
 s = reducer(s, { type: "REDRESS_START" });
 ok("REDRESS_START → redressing", s.phase === "redressing");
-const newBrief = mkBrief({ oGate: "escalate" });
+const newBrief = mkBrief({ vGate: "escalate", oGate: "escalate" });
 newBrief.style.outfit.rationale = "NEW-STYLE";
 newBrief.expressions.rationale = "NEW-EXPR";
 s = reducer(s, { type: "REDRESS_OK", style: newBrief.style, expressions: newBrief.expressions,
-                 decisions: newBrief.decisions, escalations: [] });
+                 decisions: newBrief.decisions,
+                 escalations: engineLines(newBrief, ["wardrobe: no assets — wardrobe stays heuristic"]) });
 ok("redress → ready", s.phase === "ready");
 ok("locked outfit survives redress", s.brief!.style.outfit.rationale !== "NEW-STYLE");
 ok("unlocked expression updates", s.brief!.expressions.rationale === "NEW-EXPR");
-ok("locked outfit escalation dropped", !openEscalations(s).some((e) => e.startsWith("outfit:")), JSON.stringify(openEscalations(s)));
+ok("locked outfit escalation filtered", !openEscalations(s).some((e) => e.startsWith("outfit:")), JSON.stringify(openEscalations(s)));
+ok("engine wording stored verbatim", s.brief!.escalations.some((e) => e.startsWith("outfit:")));
+ok("non-decision (wardrobe) line kept", openEscalations(s).some((e) => e.startsWith("wardrobe:")), JSON.stringify(openEscalations(s)));
+ok("unlocked verdict line open", openEscalations(s).some((e) => e.startsWith("verdict:")));
 
-// 5. unlock clears lock; override sets lock with overridden flag
+// 5. unlock restores the engine's line; override drops it for the locked verb
 s = reducer(s, { type: "LOCK_CLEAR", verb: "outfit" });
 ok("LOCK_CLEAR removes lock", !s.locks.outfit);
+ok("unlock restores outfit line", openEscalations(s).some((e) => e.startsWith("outfit:")), JSON.stringify(openEscalations(s)));
 s = reducer(s, { type: "LOCK_SET", verb: "verdict", lock: { choice: "recreate", modelChoice: "remix", modelP: 0.55, overridden: true, at: 2 } });
 const vf = decisionFor(s, "verdict");
 ok("override: effective = operator choice", vf.effective === "recreate");

@@ -113,6 +113,10 @@ export default function OperatorConsole() {
             hook_text: briefAtStart?.hook ?? "",
             verdict: briefAtStart?.mode ?? "remix",
             hook_type: hookType,
+            // the engine composes the full escalation list (verdict included)
+            // from this decision — the UI only filters it by locks.
+            verdict_decision:
+              briefAtStart?.decisions.verdict ?? stateRef.current.verdictDecision ?? null,
           },
           { signal: ac.signal },
         );
@@ -150,23 +154,30 @@ export default function OperatorConsole() {
     const { transcript, context, idea, personaId, mdep } = st.draft;
     const persona = st.personas.find((p) => p.id === personaId);
     let cmd = "analyze";
+    let echo: AnalyzeRes | null = null;
     try {
       // idea-only runs have nothing to analyze — skip straight to the brief
       if (transcript.trim()) {
-        const a = await engine<AnalyzeRes>(
+        echo = await engine<AnalyzeRes>(
           "analyze",
           { transcript, context, persona_niche: persona?.niche ?? "" },
           { signal: ac.signal },
         );
-        dispatch({ type: "ANALYZE_OK", runId, analysis: a.analysis, decision: a.decision });
+        dispatch({ type: "ANALYZE_OK", runId, analysis: echo.analysis, decision: echo.decision });
       }
       dispatch({ type: "STAGE_SET", runId, stage: "build" });
       cmd = "brief";
       // log:false — drafts never touch the stylist's cooldown log; the
       // operator commits usage explicitly via Save brief (save-brief).
+      // The analysis/decision echo rides along: the brief reuses this exact
+      // analysis instead of re-running the analyzer (one analysis, one cost).
       const b = await engine<BriefRes>(
         "brief",
-        { persona: personaId, mdep, transcript, context, idea, mode: null, log: false },
+        {
+          persona: personaId, mdep, transcript, context, idea, mode: null, log: false,
+          analysis: echo?.analysis ?? null,
+          verdict_decision: echo?.decision ?? null,
+        },
         { signal: ac.signal },
       );
       dispatch({ type: "BRIEF_OK", runId, brief: b.brief, analysis: b.analysis });
@@ -196,9 +207,16 @@ export default function OperatorConsole() {
     dispatch({ type: "OVERRIDE_START", runId });
     const { transcript, context, idea, personaId, mdep } = st.draft;
     try {
+      // Echo the analysis/decision that already shaped the on-screen brief:
+      // an override changes the mode only — the Analyzer station and the
+      // rebuilt ticket keep sharing one analysis (and no extra LLM call).
       const b = await engine<BriefRes>(
         "brief",
-        { persona: personaId, mdep, transcript, context, idea, mode, log: false },
+        {
+          persona: personaId, mdep, transcript, context, idea, mode, log: false,
+          analysis: st.analysis,
+          verdict_decision: st.verdictDecision,
+        },
         { signal: ac.signal },
       );
       dispatch({ type: "BRIEF_OK", runId, brief: b.brief, analysis: b.analysis });

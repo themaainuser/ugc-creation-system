@@ -10,14 +10,17 @@ interface Props {
   onRefresh: () => void;
 }
 
-function Led({ ok, warn, label, value }: { ok?: boolean; warn?: boolean; label: string; value: string }) {
+function Led({ ok, warn, label, value, title }: { ok?: boolean; warn?: boolean; label: string; value: string; title?: string }) {
   return (
-    <span className={`led ${ok ? "on" : warn ? "warn" : ""}`}>
+    <span className={`led ${ok ? "on" : warn ? "warn" : ""}`} title={title}>
       <span className="dot" />
       {label} <b>{value}</b>
     </span>
   );
 }
+
+/** "typesafe/jev-1.14" → "jev-1.14" — the short model name for the LED. */
+const shortModel = (m?: string | null) => (m ? m.split("/").pop()! : "");
 
 export function TopRail({ personas, personaId, health, onPersona, onRefresh }: Props) {
   const persona = personas.find((p) => p.id === personaId);
@@ -60,9 +63,15 @@ export function TopRail({ personas, personaId, health, onPersona, onRefresh }: P
 
       <div className="health" aria-label="engine health" aria-live="polite">
         <Led ok={health?.jev} warn={health ? !health.jev : undefined} label="JEV"
-             value={health ? (health.jev ? "online" : "local") : "…"} />
+             value={health ? (health.jev ? shortModel(health.models?.jev) || "online" : "local") : "…"}
+             title={health?.models?.jev
+               ? `Remote Jev decisions — ${health.models.jev} via OpenRouter`
+               : "Local Platt scorer (no remote JEV configured)"} />
         <Led ok={health?.llm} warn={health ? !health.llm : undefined} label="LLM"
-             value={health ? (health.llm ? "configured" : "off") : "…"} />
+             value={health ? (health.llm ? shortModel(health.models?.llm) || "configured" : "off") : "…"}
+             title={health?.models?.llm
+               ? `Reel typing / prompt generation — ${health.models.llm} via OpenRouter`
+               : "Heuristic analyzer (no LLM configured)"} />
         <Led ok label="Assets" value={health ? String(health.assets) : "…"} />
         <Led ok label="Personas" value={health ? String(health.personas) : "…"} />
       </div>
