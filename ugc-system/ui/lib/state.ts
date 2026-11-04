@@ -257,7 +257,11 @@ export function reducer(state: ConsoleState, action: Action): ConsoleState {
     }
 
     case "RUN_FAIL": {
+      // Reject failures that land after the output was cleared mid-run
+      // (persona switch) — a stale run must not push a stray error or
+      // resurrect a phase the operator has already moved past.
       if (action.runId !== state.runId) return state;
+      if (state.phase !== "running" && state.phase !== "overriding") return state;
       return {
         ...state,
         phase: state.brief ? "ready" : "idle",

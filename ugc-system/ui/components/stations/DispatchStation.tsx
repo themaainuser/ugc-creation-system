@@ -1,7 +1,7 @@
 /* Station 05 — Dispatch: the shoot-ready Content Brief ticket.
    Escalations and outcome capture live in the Decision Ledger; this station
    is the artifact itself, plus copy-to-clipboard for downstream generation. */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ConsoleState } from "../../lib/state";
 import { openEscalations } from "../../lib/state";
 import { engine } from "../../lib/engine";
@@ -20,6 +20,13 @@ export function DispatchStation({ state }: Props) {
   const [savedPath, setSavedPath] = useState<string | null>(null);
   const [saveErr, setSaveErr] = useState<string | null>(null);
   const escalations = openEscalations(state);
+
+  // A "Saved to …" note belongs to the exact ticket it wrote — clear it when
+  // the brief changes (new run, persona switch) so it can't claim a stale file.
+  useEffect(() => {
+    setSavedPath(null);
+    setSaveErr(null);
+  }, [brief]);
 
   const payloadOf = () => ({
     ...brief!,

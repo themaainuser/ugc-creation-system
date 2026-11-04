@@ -99,6 +99,10 @@ ok("override: escalation for locked verb dropped", !openEscalations(s).some((e) 
 s = reducer(s, { type: "DRAFT_SET", patch: { personaId: "kai" } });
 ok("persona switch clears line output", s.brief === null && s.analysis === null && Object.keys(s.locks).length === 0);
 
+// 6b. a late RUN_FAIL from the abandoned run must not push a stray error
+s = reducer(s, { type: "RUN_FAIL", runId: s.runId, cmd: "brief", message: "late failure" });
+ok("late RUN_FAIL after persona switch ignored", s.errors.length === 0, JSON.stringify(s.errors));
+
 // 7. errors queue + dismiss
 s = reducer(s, { type: "ERROR_PUSH", cmd: "plan-day", message: "boom" });
 s = reducer(s, { type: "ERROR_PUSH", cmd: "brief", message: "bust" });

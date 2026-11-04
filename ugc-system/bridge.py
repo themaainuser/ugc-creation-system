@@ -138,11 +138,28 @@ def handle(cmd: str, payload: dict):
         rec = {"date": day, "persona": brief["persona_id"],
                "assets": [Path(a.get("path", "")).name for a in worn
                           if isinstance(a, dict)]}
-        USAGE_LOG.parent.mkdir(parents=True, exist_ok=True)
-        with USAGE_LOG.open("a", encoding="utf-8") as f:
-            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        # Idempotent: saving the same brief twice in a day must not double the
+        # cooldown — dedupe on (date, persona, assets).
+        key = (day, rec["persona"], tuple(sorted(rec["assets"])))
+        seen = set()
+        if USAGE_LOG.exists():
+            for ln in USAGE_LOG.read_text(encoding="utf-8").splitlines():
+                try:
+                    r = json.loads(ln)
+                    seen.add((r.get("date"), r.get("persona"),
+                              tuple(sorted(r.get("assets") or []))))
+                except (ValueError, TypeError):
+                    continue
+        cooldown = "recorded"
+        if key not in seen:
+            USAGE_LOG.parent.mkdir(parents=True, exist_ok=True)
+            with USAGE_LOG.open("a", encoding="utf-8") as f:
+                f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        else:
+            cooldown = "already-recorded"
         return {"path": str(out_path.relative_to(ROOT)).replace("\\", "/"),
-                "persona": brief["persona_id"], "date": day}
+                "persona": brief["persona_id"], "date": day,
+                "cooldown": cooldown}
 
     if cmd == "outcome":
         # payload: {verb, chosen, confidence, gate, outcome}
