@@ -73,7 +73,6 @@ export function ExpressionStation({ state, decision, lock, onToggleLock }: Props
           <p className="rationale">{expr.rationale}</p>
 
           <DecisionCard
-            verb="expression"
             title="Expression"
             decision={decision}
             lock={lock}

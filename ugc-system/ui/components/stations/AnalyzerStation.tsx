@@ -20,9 +20,11 @@ export function AnalyzerStation({ state, analysis, decision, lock, onToggleLock,
   const { phase, brief } = state;
   const running = phase === "running" && state.activeStage === "analyze";
   const building = (phase === "running" || phase === "overriding") && state.activeStage !== "analyze";
-  const effectiveVerdict: VerdictMode | null = lock?.choice
-    ? (lock.choice as VerdictMode)
-    : (brief?.mode ?? analysis?.verdict ?? null);
+  // Effective call: operator lock > brief mode (engine-derived from the
+  // calibrated decision) > the JEV decision itself > heuristic typing last.
+  const effectiveVerdict: VerdictMode | null = (lock?.choice
+    ? lock.choice
+    : (brief?.mode ?? decision?.chosen ?? analysis?.verdict ?? null)) as VerdictMode | null;
   const otherVerdict: VerdictMode | null = effectiveVerdict
     ? effectiveVerdict === "remix" ? "recreate" : "remix"
     : null;
@@ -112,7 +114,6 @@ export function AnalyzerStation({ state, analysis, decision, lock, onToggleLock,
           </div>
 
           <DecisionCard
-            verb="verdict"
             title="Verdict"
             decision={decision}
             emptyNote="The Verdict decision appears after the analyze step."

@@ -13,6 +13,7 @@ interface Props {
   onDraft: (patch: Partial<ConsoleState["draft"]>) => void;
   onRun: () => void;
   canRun: boolean;
+  onScanned: () => void;
 }
 
 function MdepQuad({ mdep, onChange }: { mdep: MDEP; onChange: (m: MDEP) => void }) {
@@ -40,9 +41,8 @@ function MdepQuad({ mdep, onChange }: { mdep: MDEP; onChange: (m: MDEP) => void 
   );
 }
 
-export function IntakeStation({ state, onDraft, onRun, canRun }: Props) {
+export function IntakeStation({ state, onDraft, onRun, canRun, onScanned }: Props) {
   const { draft, phase, personas } = state;
-  const [folder, setFolder] = useState(draft.folder);
   const [scanning, setScanning] = useState(false);
   const [scanMsg, setScanMsg] = useState("");
 
@@ -50,18 +50,18 @@ export function IntakeStation({ state, onDraft, onRun, canRun }: Props) {
   const health: Health | null = state.health;
   const running = phase === "running" || phase === "overriding";
 
+  // During redress the button stays live and starts a fresh run — so the
+  // label must say what a click does, not what the console is doing.
   const runLabel = running
     ? state.activeStage === "analyze"
       ? "Analyzing…"
       : "Building brief…"
-    : phase === "redressing"
-      ? "Re-dressing…"
-      : state.brief
-        ? "Re-run line"
-        : "Run line";
+    : state.brief
+      ? "Re-run line"
+      : "Run line";
 
   const scan = async () => {
-    const f = folder.trim();
+    const f = draft.folder.trim();
     if (scanning || !f) return;
     setScanning(true);
     setScanMsg("");
@@ -69,7 +69,7 @@ export function IntakeStation({ state, onDraft, onRun, canRun }: Props) {
       const d = await engine<{ count: number; by_category: Record<string, number> }>("scan", { folder: f });
       const by = Object.entries(d.by_category).map(([k, v]) => `${k}: ${v}`).join(" · ");
       setScanMsg(`${d.count} asset${d.count === 1 ? "" : "s"} indexed · ${by || "no categories"}`);
-      onDraft({ folder: f });
+      onScanned(); // refresh health LEDs — the asset count just changed
     } catch (e) {
       setScanMsg(`scan failed — ${e instanceof Error ? e.message : String(e)}`);
     } finally {
@@ -158,12 +158,12 @@ export function IntakeStation({ state, onDraft, onRun, canRun }: Props) {
               id="f-folder"
               type="text"
               placeholder="C:\path\to\assets (or relative to ugc-system)"
-              value={folder}
-              onChange={(e) => setFolder(e.target.value)}
+              value={draft.folder}
+              onChange={(e) => onDraft({ folder: e.target.value })}
               onKeyDown={(e) => { if (e.key === "Enter") scan(); }}
             />
           </Field>
-          <Btn onClick={scan} loading={scanning} disabled={!folder.trim()}
+          <Btn onClick={scan} loading={scanning} disabled={!draft.folder.trim()}
                title="POST scan — indexes the folder and refreshes the asset count">
             {scanning ? "Scanning…" : "Scan assets"}
           </Btn>

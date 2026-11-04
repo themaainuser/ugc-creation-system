@@ -102,7 +102,7 @@ export type Action =
   | { type: "STAGE_SET"; runId: number; stage: ActiveStage }
   | { type: "ANALYZE_OK"; runId: number; analysis: Analysis; decision: Decision }
   | { type: "OVERRIDE_START"; runId: number }
-  | { type: "BRIEF_OK"; runId: number; brief: Brief }
+  | { type: "BRIEF_OK"; runId: number; brief: Brief; analysis?: Analysis | null }
   | { type: "RUN_FAIL"; runId: number; cmd: string; message: string }
   | { type: "REDRESS_START" }
   | { type: "REDRESS_OK"; style: StylePlan; expressions: ExpressionPlan; decisions: { outfit: Decision | null; expression: Decision | null }; escalations: string[] }
@@ -153,9 +153,10 @@ function deriveEscalations(brief: Brief, locks: ConsoleState["locks"], incoming:
       out.push(`${verb}: P(${d.chosen})=${d.confidence.toFixed(2)} → escalate`);
     }
   }
-  // keep engine-raised entries that are not per-decision (e.g. wardrobe)
+  // keep engine-raised entries that are not per-decision (e.g. wardrobe).
+  // Case-insensitive so a Python label change can't double-list a line.
   for (const e of incoming) {
-    const head = e.split(":")[0];
+    const head = e.split(":")[0].trim().toLowerCase();
     if (!DECISION_VERBS.includes(head as DecisionVerb)) out.push(e);
   }
   return out;
@@ -228,7 +229,8 @@ export function reducer(state: ConsoleState, action: Action): ConsoleState {
       return { ...state, activeStage: action.stage };
 
     case "ANALYZE_OK":
-      if (action.runId !== state.runId) return state;
+      // phase guard: a persona switch mid-run clears output (phase → idle)
+      if (action.runId !== state.runId || state.phase !== "running") return state;
       return { ...state, analysis: action.analysis, verdictDecision: action.decision };
 
     case "OVERRIDE_START":
@@ -236,11 +238,18 @@ export function reducer(state: ConsoleState, action: Action): ConsoleState {
 
     case "BRIEF_OK": {
       if (action.runId !== state.runId) return state;
+      // Reject briefs that land after the output was cleared mid-run
+      // (persona switch) — phase is only running/overriding during a build.
+      if (state.phase !== "running" && state.phase !== "overriding") return state;
       const brief = mergeBrief(state.brief, action.brief, state.locks);
       brief.escalations = deriveEscalations(brief, state.locks, action.brief.escalations);
       return {
         ...state,
         brief,
+        // The brief was built from its own analysis/decision — adopt them so
+        // the Analyzer station, the JEV card, and the ticket can't disagree.
+        analysis: action.analysis ?? state.analysis,
+        verdictDecision: brief.decisions.verdict ?? state.verdictDecision,
         phase: "ready",
         activeStage: null,
         ackedEscalations: state.ackedEscalations.filter((t) => brief.escalations.includes(t)),

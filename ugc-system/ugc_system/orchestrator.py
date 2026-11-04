@@ -42,8 +42,6 @@ def build_brief(persona: Persona, mdep: MDEP, transcript: str = "",
                 mode: Verdict | None = None,
                 analysis=None,
                 verdict_decision=None) -> ContentBrief:
-    from .core import decisions
-
     # 1. Reel analysis + calibrated verdict.
     # When the caller already ran the analyzer (bridge `line`/`brief` do),
     # keep the caller's verdict decision instead of dropping it — the UI's
@@ -51,13 +49,17 @@ def build_brief(persona: Persona, mdep: MDEP, transcript: str = "",
     if analysis is None and transcript:
         analysis, verdict_decision = reel_analyzer.decision_for(transcript, context, persona.niche)
 
-    effective_mode = mode or (analysis.verdict if analysis else Verdict.REMIX)
+    # Calibrated verdict wins over the heuristic typing: the JEV decision is
+    # the engine's actual call (mode must match decisions.verdict.chosen, or
+    # the stamp, the card, and the script outline disagree after unlock).
+    effective_mode = (mode
+                      or (Verdict(verdict_decision.chosen) if verdict_decision
+                          else (analysis.verdict if analysis else Verdict.REMIX)))
 
     # 2. Hook + script outline — preserves original beat text
     if effective_mode is Verdict.RECREATE and analysis:
         hook = analysis.hook.text_or_action
         outline = [f"{b.timestamp} [{b.purpose}] {b.what_happens}" for b in analysis.beats]
-        ending_txt = f"ending: keep original ({analysis.ending.style}) — {analysis.ending.detail}"
     elif analysis:
         hook = (analysis.remix_ideas[0] if analysis.remix_ideas
                 else f"Remix of: {analysis.hook.text_or_action}")

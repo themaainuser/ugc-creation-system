@@ -1,13 +1,12 @@
 /* JEV DecisionCard — the one surface every calibrated decision renders on.
    Shows the full distribution (never a bare label), the gate, and the
    operator's authority: lock the call / override (verdict only). */
-import type { Decision, DecisionVerb } from "../lib/types";
+import type { Decision } from "../lib/types";
 import type { Lock } from "../lib/state";
 import { pct } from "../lib/format";
 import { Btn, Chip } from "./ui";
 
 interface Props {
-  verb: DecisionVerb;
   title: string;
   decision: Decision | null;
   emptyNote?: string;
@@ -19,7 +18,6 @@ interface Props {
 }
 
 export function DecisionCard({
-  verb,
   title,
   decision,
   emptyNote,
@@ -48,6 +46,11 @@ export function DecisionCard({
   const chosenOpt = decision.options.find((o) => o.name === decision.chosen);
   const effective = lock?.choice ?? effectiveChoice ?? decision.chosen;
   const overridden = Boolean(lock?.overridden);
+  // When the operator locked a different choice, caption the engine's P for
+  // *that* choice — the number must never look like it belongs to the other.
+  const shownP = lock
+    ? (decision.options.find((o) => o.name === effective)?.p ?? decision.confidence)
+    : decision.confidence;
 
   return (
     <div className={`jev ${lock ? "locked" : ""}`} aria-label={`${title} JEV Decision`}>
@@ -59,8 +62,8 @@ export function DecisionCard({
         </Chip>
         {lock && <Chip tone="accent" title="Operator has locked this call">Locked</Chip>}
         <div className="jev-bigp">
-          <div className="p tnum">{pct(decision.confidence)}</div>
-          <div className="cap">P({decision.chosen})</div>
+          <div className="p tnum">{pct(shownP)}</div>
+          <div className="cap">P({effective})</div>
         </div>
       </div>
 

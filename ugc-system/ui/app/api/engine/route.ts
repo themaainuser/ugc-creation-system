@@ -11,6 +11,7 @@ const ALLOWED = new Set([
   "plan-day",
   "brief",
   "line",
+  "save-brief",
   "outcome",
 ]);
 

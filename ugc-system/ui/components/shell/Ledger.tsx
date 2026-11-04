@@ -1,7 +1,7 @@
 /* Decision Ledger — the right rail. Every JEV Decision for the current run,
    the escalation work queue, and outcome capture (honest option-name Brier).
    Full detail lives in the stations; this is the operator's at-a-glance queue. */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ConsoleState, DecisionVerb } from "../../lib/state";
 import { decisionFor, openEscalations } from "../../lib/state";
 import type { Decision } from "../../lib/types";
@@ -68,7 +68,12 @@ function DecisionRow({
             <i className={locked ? "lock" : decision.gate === "automate" ? "ok" : "warn"}
                style={{ width: `${Math.max(0, Math.min(1, decision.confidence)) * 100}%` }} />
           </span>
-          <span className="lr-p tnum" title={`P(${decision.chosen})`}>{pct(decision.confidence)}</span>
+          <span className="lr-p tnum"
+                title={`P(${locked && effective ? effective : decision.chosen})`}>
+            {pct(locked && effective
+              ? (decision.options.find((o) => o.name === effective)?.p ?? decision.confidence)
+              : decision.confidence)}
+          </span>
           <Chip tone={decision.gate === "automate" ? "ok" : "warn"}>
             {decision.gate === "automate" ? "Auto" : "Escalate"}
           </Chip>
@@ -93,7 +98,10 @@ function DecisionRow({
 export function Ledger({ state, onToggleLock, onJump, onAck, onSaveOutcome, onReset }: Props) {
   const escalations = openEscalations(state);
   const verbs: DecisionVerb[] = ["verdict", "outfit", "expression"];
-  const available = verbs.filter((v) => decisionFor(state, v).decision);
+  const available = useMemo(
+    () => verbs.filter((v) => decisionFor(state, v).decision),
+    [state], // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
   const [selVerb, setSelVerb] = useState<DecisionVerb>("verdict");
   const [selOption, setSelOption] = useState<string>("");
@@ -178,13 +186,12 @@ export function Ledger({ state, onToggleLock, onJump, onAck, onSaveOutcome, onRe
           <p className="hint">Run the line to capture an outcome.</p>
         ) : (
           <>
-            <div className="seg" role="radiogroup" aria-label="decision to score">
+            <div className="seg" role="group" aria-label="decision to score">
               {available.map((v) => (
                 <button
                   key={v}
                   type="button"
-                  role="radio"
-                  aria-checked={selVerb === v}
+                  aria-pressed={selVerb === v}
                   className={`seg-btn ${selVerb === v ? "sel" : ""}`}
                   onClick={() => { setSelVerb(v); setSelOption(""); }}
                 >
@@ -192,13 +199,12 @@ export function Ledger({ state, onToggleLock, onJump, onAck, onSaveOutcome, onRe
                 </button>
               ))}
             </div>
-            <div className="outcome-opts" role="radiogroup" aria-label="realised option">
+            <div className="outcome-opts" role="group" aria-label="realised option">
               {(selDecision?.options ?? []).map((o) => (
                 <button
                   key={o.name}
                   type="button"
-                  role="radio"
-                  aria-checked={selOption === o.name}
+                  aria-pressed={selOption === o.name}
                   className={`opt-chip ${selOption === o.name ? "sel" : ""}`}
                   onClick={() => setSelOption(o.name)}
                 >
@@ -213,14 +219,15 @@ export function Ledger({ state, onToggleLock, onJump, onAck, onSaveOutcome, onRe
                 Save outcome
               </Btn>
             </div>
-            {outcome && (
+            {outcome && outcome.verb === selVerb && (
               <p className="outcome-result tnum" role="status">
                 Logged — {outcome.verb} → {outcome.option}, Brier {outcome.brier.toFixed(3)}
                 <span className="hint"> · lower is better, 0 = the call was exactly right</span>
               </p>
             )}
             <p className="hint">
-              Outcome = which option actually proved correct. Written to{" "}
+              Outcome = which option actually proved correct; it scores the engine's
+              decision distribution (your lock doesn't change it). Written to{" "}
               <span className="mono">data/decisions/outcomes.jsonl</span> for calibration.
             </p>
           </>

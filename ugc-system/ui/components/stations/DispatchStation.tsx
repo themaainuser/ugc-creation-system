@@ -4,6 +4,7 @@
 import { useState } from "react";
 import type { ConsoleState } from "../../lib/state";
 import { openEscalations } from "../../lib/state";
+import { engine } from "../../lib/engine";
 import { mdepLine } from "../../lib/format";
 import { Btn, Chip, Empty, SkeletonStack, Station } from "../ui";
 
@@ -15,23 +16,27 @@ export function DispatchStation({ state }: Props) {
   const { phase, brief, locks, outcome } = state;
   const running = (phase === "running" || phase === "overriding") && state.activeStage !== "analyze";
   const [copied, setCopied] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [savedPath, setSavedPath] = useState<string | null>(null);
+  const [saveErr, setSaveErr] = useState<string | null>(null);
   const escalations = openEscalations(state);
+
+  const payloadOf = () => ({
+    ...brief!,
+    operator: {
+      locks: Object.fromEntries(
+        Object.entries(locks).map(([v, l]) => [
+          v,
+          { choice: l!.choice, overridden: l!.overridden, at: new Date(l!.at).toISOString() },
+        ]),
+      ),
+      outcome,
+    },
+  });
 
   const copy = () => {
     if (!brief) return;
-    const payload = {
-      ...brief,
-      operator: {
-        locks: Object.fromEntries(
-          Object.entries(locks).map(([v, l]) => [
-            v,
-            { choice: l!.choice, overridden: l!.overridden, at: new Date(l!.at).toISOString() },
-          ]),
-        ),
-        outcome,
-      },
-    };
-    const txt = JSON.stringify(payload, null, 2);
+    const txt = JSON.stringify(payloadOf(), null, 2);
     if (navigator.clipboard) {
       navigator.clipboard
         .writeText(txt)
@@ -40,6 +45,21 @@ export function DispatchStation({ state }: Props) {
           window.setTimeout(() => setCopied(false), 1600);
         })
         .catch(() => window.alert("Clipboard write failed — select the ticket JSON manually."));
+    }
+  };
+
+  // Commit: writes data/briefs/{persona}_{date}.json verbatim + cooldown log.
+  const save = async () => {
+    if (!brief || saving) return;
+    setSaving(true);
+    setSaveErr(null);
+    try {
+      const r = await engine<{ path: string }>("save-brief", { brief: payloadOf() });
+      setSavedPath(r.path);
+    } catch (e) {
+      setSaveErr(e instanceof Error ? e.message : String(e));
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -90,13 +110,22 @@ export function DispatchStation({ state }: Props) {
           </div>
 
           <div className="dispatch-actions">
+            <Btn variant="primary" onClick={() => void save()} loading={saving}
+                 title="Write this brief to data/briefs/ and record the outfit for cooldown rotation">
+              {saving ? "Saving…" : "Save brief"}
+            </Btn>
             <Btn variant="secondary" onClick={copy}>
-              {copied ? "Copied ✓" : "Copy brief JSON"}
+              {copied ? "Copied ✓" : "Copy JSON"}
             </Btn>
             <span className="hint">
-              JSON carries the brief plus your locks and outcome under{" "}
-              <span className="mono">operator</span>.
+              Save writes <span className="mono">data/briefs/{brief.persona_id}_&lt;date&gt;.json</span> and
+              commits the cooldown — runs alone never log usage. JSON also carries your
+              locks and outcome under <span className="mono">operator</span>.
             </span>
+            {savedPath && (
+              <p className="save-note ok" role="status">Saved to <span className="mono">{savedPath}</span></p>
+            )}
+            {saveErr && <p className="save-note err" role="alert">{saveErr}</p>}
           </div>
         </>
       )}

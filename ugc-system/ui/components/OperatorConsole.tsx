@@ -151,28 +151,66 @@ export default function OperatorConsole() {
     const persona = st.personas.find((p) => p.id === personaId);
     let cmd = "analyze";
     try {
-      const a = await engine<AnalyzeRes>(
-        "analyze",
-        { transcript, context, persona_niche: persona?.niche ?? "" },
-        { signal: ac.signal },
-      );
-      dispatch({ type: "ANALYZE_OK", runId, analysis: a.analysis, decision: a.decision });
+      // idea-only runs have nothing to analyze — skip straight to the brief
+      if (transcript.trim()) {
+        const a = await engine<AnalyzeRes>(
+          "analyze",
+          { transcript, context, persona_niche: persona?.niche ?? "" },
+          { signal: ac.signal },
+        );
+        dispatch({ type: "ANALYZE_OK", runId, analysis: a.analysis, decision: a.decision });
+      }
       dispatch({ type: "STAGE_SET", runId, stage: "build" });
       cmd = "brief";
+      // log:false — drafts never touch the stylist's cooldown log; the
+      // operator commits usage explicitly via Save brief (save-brief).
       const b = await engine<BriefRes>(
         "brief",
-        { persona: personaId, mdep, transcript, context, idea, mode: null, log: true },
+        { persona: personaId, mdep, transcript, context, idea, mode: null, log: false },
         { signal: ac.signal },
       );
-      dispatch({ type: "BRIEF_OK", runId, brief: b.brief });
-      lastRedressKey.current = redressKey(stateRef.current.draft.personaId, stateRef.current.draft.mdep);
+      dispatch({ type: "BRIEF_OK", runId, brief: b.brief, analysis: b.analysis });
+      // seed from the brief's own MDEP: if the operator edited MDEP while the
+      // line ran, keys differ and a reconciling re-dress fires.
+      lastRedressKey.current = redressKey(stateRef.current.draft.personaId, b.brief.mdep);
     } catch (e) {
       if (isAbort(e)) return;
       dispatch({ type: "RUN_FAIL", runId, cmd, message: errText(e) });
     }
   }, []);
 
-  /* ---------- verdict override: rebuild the brief with the operator's mode ---------- */
+  /* ---------- shared: rebuild the brief with a given Verdict mode ---------- */
+
+  const rebuildBrief = useCallback(async (mode: VerdictMode, onFail?: () => void) => {
+    const st = stateRef.current;
+    if (!st.brief) return;
+    if (st.phase !== "ready" && st.phase !== "overriding" && st.phase !== "redressing") return;
+
+    // supersede anything in flight
+    redressRef.current.ac?.abort();
+    redressRef.current.seq += 1;
+    runRef.current.ac?.abort();
+    const ac = new AbortController();
+    runRef.current.ac = ac;
+    const runId = ++runRef.current.runId;
+    dispatch({ type: "OVERRIDE_START", runId });
+    const { transcript, context, idea, personaId, mdep } = st.draft;
+    try {
+      const b = await engine<BriefRes>(
+        "brief",
+        { persona: personaId, mdep, transcript, context, idea, mode, log: false },
+        { signal: ac.signal },
+      );
+      dispatch({ type: "BRIEF_OK", runId, brief: b.brief, analysis: b.analysis });
+      lastRedressKey.current = redressKey(stateRef.current.draft.personaId, b.brief.mdep);
+    } catch (e) {
+      if (isAbort(e)) return;
+      onFail?.();
+      dispatch({ type: "RUN_FAIL", runId, cmd: "brief", message: errText(e) });
+    }
+  }, []);
+
+  /* ---------- verdict override: rebuild with the operator's mode ---------- */
 
   const overrideVerdict = useCallback(async (choice: VerdictMode) => {
     const st = stateRef.current;
@@ -181,7 +219,6 @@ export default function OperatorConsole() {
     const current = (st.locks.verdict?.choice ?? st.brief.mode) as VerdictMode;
     if (choice === current) return;
 
-    const runId = ++runRef.current.runId;
     dispatch({
       type: "LOCK_SET",
       verb: "verdict",
@@ -193,22 +230,8 @@ export default function OperatorConsole() {
         at: Date.now(),
       },
     });
-    dispatch({ type: "OVERRIDE_START", runId });
-    const { transcript, context, idea, personaId, mdep } = st.draft;
-    try {
-      const b = await engine<BriefRes>(
-        "brief",
-        { persona: personaId, mdep, transcript, context, idea, mode: choice, log: false },
-        {},
-      );
-      dispatch({ type: "BRIEF_OK", runId, brief: b.brief });
-      lastRedressKey.current = redressKey(stateRef.current.draft.personaId, stateRef.current.draft.mdep);
-    } catch (e) {
-      if (isAbort(e)) return;
-      dispatch({ type: "LOCK_CLEAR", verb: "verdict" });
-      dispatch({ type: "RUN_FAIL", runId, cmd: "brief", message: errText(e) });
-    }
-  }, []);
+    await rebuildBrief(choice, () => dispatch({ type: "LOCK_CLEAR", verb: "verdict" }));
+  }, [rebuildBrief]);
 
   /* ---------- operator authority ---------- */
 
@@ -218,6 +241,15 @@ export default function OperatorConsole() {
     if (!decision) return;
     if (lock) {
       dispatch({ type: "LOCK_CLEAR", verb });
+      // An override left brief.mode at the operator's choice — rebuild with
+      // the engine's calibrated call so stamp, card, and script agree again.
+      if (verb === "verdict" && st.brief && st.brief.mode !== decision.chosen &&
+          (st.phase === "ready" || st.phase === "redressing")) {
+        void rebuildBrief(
+          decision.chosen as VerdictMode,
+          () => dispatch({ type: "LOCK_SET", verb: "verdict", lock }),
+        );
+      }
       return;
     }
     const choice = verb === "verdict" ? (st.brief?.mode ?? decision.chosen) : decision.chosen;
@@ -232,7 +264,7 @@ export default function OperatorConsole() {
         at: Date.now(),
       },
     });
-  }, []);
+  }, [rebuildBrief]);
 
   /* ---------- outcome capture (honest option-name Brier) ---------- */
 
@@ -314,6 +346,7 @@ export default function OperatorConsole() {
           onDraft={(patch) => dispatch({ type: "DRAFT_SET", patch })}
           onRun={() => void runLine()}
           canRun={canRunSel(s)}
+          onScanned={() => void loadMeta()}
         />
 
         <div className="col col-line">

@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "tsc lib/state.ts lib/types.ts lib/state.test.ts --outDir .test-dist --module commonjs --target es2022 --lib es2022 --esModuleInterop --skipLibCheck --strict && node .test-dist/state.test.js"
   },
   "dependencies": {
     "next": "^16.2.9",

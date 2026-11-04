@@ -8,11 +8,13 @@ Commands:
   brief {...}         → ContentBrief (with decisions + escalations)
   plan-day {...}      → {style, expressions, decisions}
   line {...}          → {analysis, decision, brief}
+  save-brief {brief}  → writes data/briefs/{persona}_{date}.json + cooldown log
   health              → {"ok":true,"jev":bool,"llm":bool,"assets":n,"personas":n}
   outcome {...}       → log Brier-scored outcome, returns {"brier":x}
 """
 from __future__ import annotations
 import json, sys
+from datetime import date
 from pathlib import Path
 import yaml
 
@@ -22,7 +24,7 @@ sys.path.insert(0, str(ROOT))
 from ugc_system.core.models import MDEP, Persona, Verdict
 from ugc_system.core import decisions
 from ugc_system.engines import asset_library, expressions, stylist, reel_analyzer
-from ugc_system.orchestrator import build_brief, escalation_list, log_usage, escalation_list
+from ugc_system.orchestrator import USAGE_LOG, build_brief, escalation_list, log_usage
 
 PERSONAS_DIR = ROOT / "personas"
 INDEX_PATH = ROOT / "assets" / "index.json"
@@ -115,6 +117,32 @@ def handle(cmd: str, payload: dict):
             log_usage(brief)
         out = {"brief": _clean(brief), "analysis": _clean(analysis) if analysis else None}
         return out
+
+    if cmd == "save-brief":
+        # Write the operator-approved brief verbatim to data/briefs/ (I/O only —
+        # no transformation) and record the worn assets for cooldown rotation.
+        # Runs are log-free; the cooldown commits on dispatch, not on drafts.
+        brief = payload.get("brief")
+        if not isinstance(brief, dict) or not brief.get("persona_id"):
+            raise ValueError("save-brief requires a brief object with persona_id")
+        day = str(date.today())
+        out_path = ROOT / "data" / "briefs" / f"{brief['persona_id']}_{day}.json"
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(brief, ensure_ascii=False, indent=2),
+                            encoding="utf-8")
+        outfit = ((brief.get("style") or {}).get("outfit")) or {}
+        worn = list(outfit.get("items") or [])
+        for k in ("jewelry", "footwear"):
+            if outfit.get(k):
+                worn.append(outfit[k])
+        rec = {"date": day, "persona": brief["persona_id"],
+               "assets": [Path(a.get("path", "")).name for a in worn
+                          if isinstance(a, dict)]}
+        USAGE_LOG.parent.mkdir(parents=True, exist_ok=True)
+        with USAGE_LOG.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        return {"path": str(out_path.relative_to(ROOT)).replace("\\", "/"),
+                "persona": brief["persona_id"], "date": day}
 
     if cmd == "outcome":
         # payload: {verb, chosen, confidence, gate, outcome}

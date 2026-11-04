@@ -49,5 +49,6 @@ export async function engine<T>(
 }
 
 export function isAbort(e: unknown): boolean {
-  return e instanceof DOMException && e.name === "AbortError";
+  // Browsers differ: DOMException vs TypeError, both named "AbortError".
+  return typeof e === "object" && e !== null && (e as { name?: unknown }).name === "AbortError";
 }

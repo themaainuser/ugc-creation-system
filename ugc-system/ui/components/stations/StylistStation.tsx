@@ -47,7 +47,6 @@ export function StylistStation({ state, decision, lock, onToggleLock, onJumpInta
             action={<Btn onClick={onJumpIntake}>Scan assets</Btn>}
           />
           <DecisionCard
-            verb="outfit"
             title="Outfit"
             decision={decision}
             emptyNote="No Outfit decision — the wardrobe was empty."
@@ -80,7 +79,6 @@ export function StylistStation({ state, decision, lock, onToggleLock, onJumpInta
           {brief.style.outfit.rationale && <p className="rationale">{brief.style.outfit.rationale}</p>}
 
           <DecisionCard
-            verb="outfit"
             title="Outfit"
             decision={decision}
             lock={lock}
