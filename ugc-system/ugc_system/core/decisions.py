@@ -49,7 +49,7 @@ class Decision:
     confidence: float              # P(chosen)
     gate: str                      # "automate" | "escalate"
     rationale: str
-    brier_estimate: float          # expected Brier if chosen is wrong ~ (1-c)^2 + c^2*(n-1)/n
+    brier_estimate: float          # multiclass Brier estimate, matching score_proper (/ n)
     calibrated: bool = True        # whether Platt scaling was applied
 
     def to_dict(self) -> dict:
@@ -88,6 +88,37 @@ def _softmax(scores: dict[str, float], temp: float = 1.0) -> dict[str, float]:
     return {k: v / s for k, v in exps.items()}
 
 
+def _softmax_temp_for_verb(verb: str, cfg_dec: dict | None = None) -> float:
+    """Per-verb softmax temperature from ``decision.softmax_temp``.
+
+    Supports a scalar (same temp for every verb) or a ``{verb: temp}`` map
+    for per-verb overrides. Defaults to 0.5 if not set in config.
+    """
+    if cfg_dec is None:
+        cfg_dec = _config().get("decision", {}) or {}
+    raw = cfg_dec.get("softmax_temp", 0.5)
+    if isinstance(raw, dict):
+        try:
+            return float(raw.get(verb, 0.5))
+        except (TypeError, ValueError):
+            return 0.5
+    try:
+        return float(raw)
+    except (TypeError, ValueError):
+        return 0.5
+
+
+def _brier_estimate(confidence: float, n: int) -> float:
+    """Multiclass Brier estimate matching :func:`score_proper` (divide by n).
+
+    Uses the same ``/ n`` normalisation as ``score_proper`` so estimates are
+    comparable with realised Brier scores logged via ``save_outcome``.
+    """
+    if n <= 0:
+        return 0.0
+    return ((1.0 - confidence) ** 2 + (confidence ** 2) * (n - 1) / n) / n
+
+
 _JEV_BASE = os.environ.get("JEV_BASE_URL", "").rstrip("/")
 _JEV_MODEL = os.environ.get("JEV_MODEL", "jev-1.0")
 
@@ -124,10 +155,11 @@ def decide(verb: str, options: dict[str, float] | list[str],
     pre-scored dict. `scorer(name) -> (raw_score, signals)` for list form.
     """
     context = context or {}
-    cfg_dec = _config().get("decision", {})
+    cfg_dec = _config().get("decision", {}) or {}
     threshold = float(cfg_dec.get("automate_threshold", 0.72))
     a = float(cfg_dec.get("platt_a", 1.1))
     b = float(cfg_dec.get("platt_b", 0.05))
+    temp = _softmax_temp_for_verb(verb, cfg_dec)
 
     if isinstance(options, dict):
         raw_scores = {k: float(v) for k, v in options.items()}
@@ -152,16 +184,21 @@ def decide(verb: str, options: dict[str, float] | list[str],
                      for n in sorted(remote, key=remote.get, reverse=True)],
             chosen=chosen, confidence=conf, gate=gate,
             rationale=f"Remote JEV (hosted): P({chosen})={conf:.2f} ≥{threshold} → {gate}.",
-            brier_estimate=(1 - conf) ** 2 + (conf ** 2) * (len(remote) - 1) / max(1, len(remote)),
+            brier_estimate=_brier_estimate(conf, len(remote)),
         )
 
-    # 2. Local RLCD fallback: softmax over raw scores → Platt calibration
-    probs = _softmax(raw_scores, temp=1.0)
-    calibrated = {k: _platt(math.log(max(1e-6, v)) * 3.0 + 0.4, a, b) for k, v in probs.items()}
-    # renormalise calibrated probs to sum 1 (Platt per-option → joint)
-    s = sum(calibrated.values()) or 1.0
-    calibrated = {k: v / s for k, v in calibrated.items()}
-    # weighted blend: keep calibration honest — sparse softmax + Platt
+    # 2. Local heuristic fallback: Platt applied to raw scores (logits) once,
+    # then renormalised only if needed to sum to 1.
+    # The Platt a/b still come from config defaults — they are not yet fitted
+    # to logged outcomes, so this path is reported as calibrated=False until
+    # a fit exists (see save_outcome / score_proper for the retuning loop).
+    fitted = {k: _platt(float(raw_scores[k]), a, b) for k in raw_scores}
+    s = sum(fitted.values()) or 1.0
+    # Only renormalise if the per-option Platt outputs don't already sum to ~1.
+    if abs(s - 1.0) > 1e-6:
+        calibrated = {k: v / s for k, v in fitted.items()}
+    else:
+        calibrated = fitted
     chosen = max(calibrated, key=calibrated.get)
     conf = calibrated[chosen]
     gate = "automate" if conf >= threshold else "escalate"
@@ -169,13 +206,14 @@ def decide(verb: str, options: dict[str, float] | list[str],
     sigs = signals_map.get(chosen, [])
     rationale = (f"P({chosen})={conf:.2f} → {gate} (≥{threshold} to automate). "
                  + (f"Drove by: {', '.join(sigs[:4])}." if sigs else "No dominant signal — escalate if operator disagrees."))
-    brier = (1 - conf) ** 2 + (conf ** 2) * (len(calibrated) - 1) / max(1, len(calibrated))
+    brier = _brier_estimate(conf, len(calibrated))
     return Decision(
         verb=verb,
         options=[OptionScore(n, raw_scores[n], calibrated[n], signals_map.get(n, []))
                  for n in sorted(calibrated, key=calibrated.get, reverse=True)],
         chosen=chosen, confidence=conf, gate=gate,
         rationale=rationale, brier_estimate=brier,
+        calibrated=False,  # local heuristic path: Platt defaults, not yet fitted to outcomes
     )
 
 
