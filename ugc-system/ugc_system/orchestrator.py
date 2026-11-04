@@ -18,19 +18,38 @@ ROOT = Path(__file__).resolve().parent.parent
 USAGE_LOG = ROOT / "data" / "briefs" / "usage.log"
 
 
+def escalation_list(verdict_decision=None, outfit_decision=None,
+                    expression_decision=None, wardrobe_empty: bool = False) -> list[str]:
+    """Operator review queue: anything gated "escalate" plus empty wardrobe.
+
+    Single source of truth for escalation wording — build_brief and the
+    bridge's plan-day both go through here (the UI re-derives the same lines
+    from the *effective* decisions after operator locks).
+    """
+    out: list[str] = []
+    for label, d in (("verdict", verdict_decision), ("outfit", outfit_decision),
+                     ("expression", expression_decision)):
+        if d and d.gate == "escalate":
+            out.append(f"{label}: P({d.chosen})={d.confidence:.2f} → escalate")
+    if wardrobe_empty:
+        out.append("wardrobe: empty — scan assets before shooting")
+    return out
+
+
 def build_brief(persona: Persona, mdep: MDEP, transcript: str = "",
                 context: str = "", idea: str = "",
                 assets: list | None = None,
                 mode: Verdict | None = None,
-                analysis=None) -> ContentBrief:
+                analysis=None,
+                verdict_decision=None) -> ContentBrief:
     from .core import decisions
 
-    # 1. Reel analysis + calibrated verdict
-    verdict_decision = None
+    # 1. Reel analysis + calibrated verdict.
+    # When the caller already ran the analyzer (bridge `line`/`brief` do),
+    # keep the caller's verdict decision instead of dropping it — the UI's
+    # Verdict JEV card, its escalation gate, and outcome scoring all read it.
     if analysis is None and transcript:
         analysis, verdict_decision = reel_analyzer.decision_for(transcript, context, persona.niche)
-    elif analysis is not None:
-        verdict_decision = None  # already have analysis; mode below decides
 
     effective_mode = mode or (analysis.verdict if analysis else Verdict.REMIX)
 
@@ -71,13 +90,8 @@ def build_brief(persona: Persona, mdep: MDEP, transcript: str = "",
     tags = _hashtags(persona, analysis)
 
     # 6. Escalation flags — operator must review anything gated "escalate"
-    escalations: list[str] = []
-    for label, d in (("verdict", verdict_decision), ("outfit", outfit_decision),
-                     ("expression", expr_decision)):
-        if d and d.gate == "escalate":
-            escalations.append(f"{label}: P({d.chosen})={d.confidence:.2f} → escalate")
-    if not (assets or []):
-        escalations.append("wardrobe: empty — scan assets before shooting")
+    escalations = escalation_list(verdict_decision, outfit_decision, expr_decision,
+                                  wardrobe_empty=not (assets or []))
 
     brief = ContentBrief(
         persona_id=persona.id, mdep=mdep, mode=effective_mode,

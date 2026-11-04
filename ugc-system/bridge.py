@@ -22,7 +22,7 @@ sys.path.insert(0, str(ROOT))
 from ugc_system.core.models import MDEP, Persona, Verdict
 from ugc_system.core import decisions
 from ugc_system.engines import asset_library, expressions, stylist, reel_analyzer
-from ugc_system.orchestrator import build_brief, log_usage
+from ugc_system.orchestrator import build_brief, escalation_list, log_usage, escalation_list
 
 PERSONAS_DIR = ROOT / "personas"
 INDEX_PATH = ROOT / "assets" / "index.json"
@@ -86,11 +86,20 @@ def handle(cmd: str, payload: dict):
 
     if cmd == "plan-day":
         persona = _persona(payload["persona"]); mdep = _mdep(payload.get("mdep"))
+        # Pass the current hook/verdict context so expressions keep honoring
+        # brand-trust / children / recreate bans during MDEP re-dress.
+        hook_text = payload.get("hook_text", "")
+        verdict = payload.get("verdict", "remix")
+        hook_type = payload.get("hook_type", "")
         style = stylist.plan(_assets(), persona, mdep)
-        expr = expressions.plan(persona, mdep)
+        expr = expressions.plan(persona, mdep, hook_text=hook_text,
+                                verdict=verdict, hook_type=hook_type)
+        outfit_d = stylist.decision_for_chosen(_assets(), persona, mdep)
+        expr_d = expressions.decision(persona, mdep, hook_text, verdict, hook_type)
         return {"style": _clean(style), "expressions": _clean(expr),
-                "decisions": {"outfit": _clean(stylist.decision_for_chosen(_assets(), persona, mdep)),
-                              "expression": _clean(expressions.decision(persona, mdep))}}
+                "decisions": {"outfit": _clean(outfit_d), "expression": _clean(expr_d)},
+                "escalations": escalation_list(
+                    None, outfit_d, expr_d, wardrobe_empty=not _assets())}
 
     if cmd in ("brief", "line"):
         persona = _persona(payload["persona"]); mdep = _mdep(payload.get("mdep"))
@@ -100,7 +109,8 @@ def handle(cmd: str, payload: dict):
         if transcript:
             analysis, dec = reel_analyzer.decision_for(transcript, context, persona.niche)
         brief = build_brief(persona, mdep, transcript=transcript, context=context,
-                            idea=payload.get("idea",""), assets=_assets(), mode=mode, analysis=analysis)
+                            idea=payload.get("idea",""), assets=_assets(), mode=mode,
+                            analysis=analysis, verdict_decision=dec)
         if payload.get("log", True):
             log_usage(brief)
         out = {"brief": _clean(brief), "analysis": _clean(analysis) if analysis else None}

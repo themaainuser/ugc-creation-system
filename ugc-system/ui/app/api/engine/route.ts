@@ -14,6 +14,8 @@ const ALLOWED = new Set([
   "outcome",
 ]);
 
+const clip = (s: string, n = 800) => (s.length > n ? `${s.slice(0, n)}…` : s);
+
 export async function POST(req: Request) {
   let cmd = "";
   let payload: unknown = {};
@@ -39,6 +41,8 @@ export async function POST(req: Request) {
       [bridge, cmd],
       { timeout: 180_000, maxBuffer: 16 * 1024 * 1024, windowsHide: true },
       (err, stdout, stderr) => {
+        const errOut = clip(stderr || "");
+
         if (err && !stdout) {
           // Python missing, bridge crash before JSON, etc.
           const hint =
@@ -47,23 +51,48 @@ export async function POST(req: Request) {
               : "";
           resolve(
             NextResponse.json(
-              { error: `engine failed${hint}: ${stderr || err.message}` },
+              { error: `engine failed${hint}: ${errOut || err.message}` },
               { status: 500 },
             ),
           );
           return;
         }
+
+        let data: unknown;
         try {
-          const data = JSON.parse(stdout);
-          resolve(NextResponse.json(data));
+          data = JSON.parse(stdout);
         } catch {
           resolve(
             NextResponse.json(
-              { error: `unparseable engine output: ${stdout.slice(0, 300)}` },
+              {
+                error: `unparseable engine output: ${clip(stdout, 300)}${
+                  errOut ? ` · stderr: ${errOut}` : ""
+                }`,
+              },
               { status: 500 },
             ),
           );
+          return;
         }
+
+        // The bridge reports failures as {"error": ...} on stdout with exit 0.
+        // Forward them as non-200 so the client classifies them as engine errors.
+        const bridgeErr = (data as { error?: unknown }).error;
+        if (typeof bridgeErr === "string" && bridgeErr) {
+          resolve(
+            NextResponse.json(
+              { error: clip(bridgeErr) + (errOut ? ` · stderr: ${errOut}` : "") },
+              { status: 502 },
+            ),
+          );
+          return;
+        }
+
+        if (err) {
+          // Non-zero exit but parseable stdout — serve it, attach stderr note.
+          console.warn(`[engine] ${cmd} exited non-zero: ${errOut || err.message}`);
+        }
+        resolve(NextResponse.json(data));
       },
     ).stdin?.end(JSON.stringify(payload));
   });
