@@ -23,7 +23,10 @@ export function AnalyzerStation({ state, analysis, decision, lock, onToggleLock,
   const building = (phase === "running" || phase === "overriding") && state.activeStage !== "analyze";
   // Idea-only run: the analyzer was skipped (no reel to score) — the station
   // says so instead of pretending analysis is merely pending or cleared.
-  const skipped = analyzeSkipped(state);
+  // skippedNow also covers the build window, before the brief lands.
+  const skipped =
+    analyzeSkipped(state) ||
+    (building && !analysis && !state.draft.transcript.trim());
   // Effective call: operator lock > brief mode (engine-derived from the
   // calibrated decision) > the JEV decision itself > heuristic typing last.
   const effectiveVerdict: VerdictMode | null = (lock?.choice
@@ -38,7 +41,7 @@ export function AnalyzerStation({ state, analysis, decision, lock, onToggleLock,
       id="station-analyzer"
       idx="02"
       title="Analyzer"
-      stamp={running ? "Scanning" : building ? "Queued" : analysis ? "Complete" : skipped ? "Skipped" : undefined}
+      stamp={running ? "Scanning" : analysis ? "Complete" : skipped ? "Skipped" : building ? "Queued" : undefined}
       stampTone={running ? "active" : "done"}
     >
       {running ? (
@@ -127,9 +130,7 @@ export function AnalyzerStation({ state, analysis, decision, lock, onToggleLock,
           <DecisionCard
             title="Verdict"
             decision={decision}
-            emptyNote={skipped
-              ? "Idea-only brief — no reel to score, so no Verdict decision."
-              : "The Verdict decision appears after the analyze step."}
+            emptyNote="The Verdict decision appears after the analyze step."
             lock={lock}
             effectiveChoice={effectiveVerdict}
             onToggleLock={onToggleLock}
