@@ -25,11 +25,12 @@ def health() -> dict:
     import importlib.util as iu
     import os
     from ..core.env import load_env
+    from ..core import opus
     from . import mastermind, transcribe
     load_env()
     try:
-        mm = mastermind.pick_provider()
-    except mastermind.MastermindError:
+        mm = opus.pick_provider()
+    except opus.OpusError:
         mm = None
     return {
         "ffmpeg": bool(shutil.which("ffmpeg") and shutil.which("ffprobe")),

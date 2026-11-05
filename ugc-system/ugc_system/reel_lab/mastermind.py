@@ -10,25 +10,20 @@ without calling (and without spending) anything.
 """
 from __future__ import annotations
 
-import base64
-import io
 import json
 import os
 import re
 import time
 from pathlib import Path
 
-from PIL import Image
-
+from ..core import opus
 from ..core.env import ROOT
 from .transcribe import as_timed_text
 
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp"}
-PRICE = {"input": 4.0, "output": 20.0}  # USD per 1M tokens, Opus 5.5
 
 
-class MastermindError(RuntimeError):
-    pass
+MastermindError = opus.OpusError
 
 
 SYSTEM = """You are the Mastermind of an AI UGC studio that runs AI-generated influencer accounts (male, female and gender-neutral personas). You combine three crafts:
@@ -112,17 +107,6 @@ def _persona_text(pid: str | None) -> str:
     return p.read_text(encoding="utf-8") if p.exists() else f"(persona '{pid}' not found)"
 
 
-def _b64_image(path: Path, long_side: int = 1280) -> tuple[str, str]:
-    """Re-encode to JPEG under a size cap (keeps the request small)."""
-    img = Image.open(path)
-    img = img.convert("RGB") if img.mode not in ("RGB",) else img
-    if max(img.size) > long_side:
-        img.thumbnail((long_side, long_side))
-    buf = io.BytesIO()
-    img.save(buf, format="JPEG", quality=88)
-    return "image/jpeg", base64.standard_b64encode(buf.getvalue()).decode()
-
-
 def build_request(job) -> dict:
     """Provider-neutral request: system text + ordered list of parts."""
     spec = job.spec
@@ -188,93 +172,6 @@ Audio profile: {json.dumps(info.get('audio') or {})}
 
 
 # ---------------------------------------------------------------- providers
-def pick_provider() -> str:
-    forced = (os.environ.get("UGC_MASTERMIND_PROVIDER") or "auto").lower()
-    if forced != "auto":
-        return forced
-    if os.environ.get("ANTHROPIC_API_KEY"):
-        return "anthropic"
-    if os.environ.get("OPEN_ROUTER_API_KEY") or os.environ.get("UGC_LLM_API_KEY"):
-        return "openrouter"
-    raise MastermindError("No model key: set ANTHROPIC_API_KEY or OPEN_ROUTER_API_KEY in ugc-system/.env")
-
-
-def _call_anthropic(req: dict, on_text) -> dict:
-    try:
-        import anthropic
-    except ImportError as e:
-        raise MastermindError("anthropic package not installed (pip install anthropic)") from e
-    blocks = []
-    for p in req["parts"]:
-        if p["type"] == "text":
-            blocks.append({"type": "text", "text": p["text"]})
-        else:
-            mt, data = _b64_image(Path(p["path"]))
-            blocks.append({"type": "image", "source": {"type": "base64", "media_type": mt, "data": data}})
-    model = os.environ.get("UGC_MASTERMIND_MODEL", "claude-opus-5-5")
-    client = anthropic.Anthropic()
-    with client.beta.messages.stream(
-        model=model,
-        max_tokens=64000,
-        thinking={"type": "adaptive"},
-        output_config={"effort": os.environ.get("UGC_MASTERMIND_EFFORT", "high")},
-        system=[{"type": "text", "text": req["system"], "cache_control": {"type": "ephemeral"}}],
-        messages=[{"role": "user", "content": blocks}],
-        # Server-side fallback: if a safety classifier declines (e.g. on an
-        # adult-wellness brief), the API retries on a fallback model.
-        betas=["server-side-fallback-2026-07-01"],
-        extra_body={"fallbacks": "default"},
-    ) as stream:
-        for text in stream.text_stream:
-            on_text(text)
-        msg = stream.get_final_message()
-    if msg.stop_reason == "refusal":
-        raise MastermindError(f"model declined the request ({getattr(msg, 'stop_details', None)})")
-    text = "".join(b.text for b in msg.content if b.type == "text")
-    u = msg.usage
-    return {"text": text, "model": msg.model, "stop_reason": msg.stop_reason,
-            "input_tokens": u.input_tokens + (u.cache_read_input_tokens or 0) + (u.cache_creation_input_tokens or 0),
-            "output_tokens": u.output_tokens}
-
-
-def _call_openrouter(req: dict, on_text) -> dict:
-    try:
-        from openai import OpenAI
-    except ImportError as e:
-        raise MastermindError("openai package not installed (pip install openai)") from e
-    key = os.environ.get("OPEN_ROUTER_API_KEY") or os.environ.get("UGC_LLM_API_KEY")
-    base = (os.environ.get("OPEN_ROUTER_BASE_URL") or "https://openrouter.ai/api/v1")
-    base = re.sub(r"/chat/completions/?$", "", base)
-    model = os.environ.get("UGC_MASTERMIND_MODEL", "anthropic/claude-opus-5.5")
-    content = []
-    for p in req["parts"]:
-        if p["type"] == "text":
-            content.append({"type": "text", "text": p["text"]})
-        else:
-            mt, data = _b64_image(Path(p["path"]))
-            content.append({"type": "image_url", "image_url": {"url": f"data:{mt};base64,{data}"}})
-    client = OpenAI(api_key=key, base_url=base, timeout=900)
-    stream = client.chat.completions.create(
-        model=model, max_tokens=64000, stream=True,
-        messages=[{"role": "system", "content": req["system"]}, {"role": "user", "content": content}],
-        extra_body={"reasoning": {"effort": os.environ.get("UGC_MASTERMIND_EFFORT", "high")},
-                    "usage": {"include": True}},
-    )
-    chunks, usage, finish = [], None, None
-    for ev in stream:
-        if getattr(ev, "usage", None):
-            usage = ev.usage
-        if ev.choices:
-            d = ev.choices[0].delta
-            if d and d.content:
-                chunks.append(d.content)
-                on_text(d.content)
-            finish = ev.choices[0].finish_reason or finish
-    return {"text": "".join(chunks), "model": model, "stop_reason": finish,
-            "input_tokens": getattr(usage, "prompt_tokens", 0) or 0,
-            "output_tokens": getattr(usage, "completion_tokens", 0) or 0}
-
-
 # ---------------------------------------------------------------- output
 def split_sections(text: str) -> dict:
     out = {}
@@ -304,7 +201,7 @@ def run(job, progress=lambda m: None) -> dict:
     if os.environ.get("UGC_MASTERMIND_DRY_RUN") == "1":
         return {"dry_run": True, "images": n_img}
 
-    provider = pick_provider()
+    provider = opus.pick_provider()
     progress(f"sending {n_img} images to {provider}")
     partial = job.out / "partial.md"
     buf: list[str] = []
@@ -318,8 +215,7 @@ def run(job, progress=lambda m: None) -> dict:
             partial.write_text("".join(buf), encoding="utf-8")
             progress(f"writing - {sum(map(len, buf)) / 1000:.1f}k chars")
 
-    call = _call_anthropic if provider == "anthropic" else _call_openrouter
-    res = call(req, on_text)
+    res = opus.complete(req, on_text, max_tokens=64000)
     text = res["text"]
     (job.out / "raw_response.md").write_text(text, encoding="utf-8")
     partial.unlink(missing_ok=True)
@@ -332,7 +228,7 @@ def run(job, progress=lambda m: None) -> dict:
     if sec["blueprint_json"] is not None:
         (job.out / "blueprint.json").write_text(json.dumps(sec["blueprint_json"], indent=2, ensure_ascii=False), encoding="utf-8")
 
-    cost = res["input_tokens"] / 1e6 * PRICE["input"] + res["output_tokens"] / 1e6 * PRICE["output"]
+    cost = res["est_cost_usd"]
     usage = {"provider": provider, "model": res["model"], "stop_reason": res["stop_reason"],
              "images": n_img, "input_tokens": res["input_tokens"],
              "output_tokens": res["output_tokens"], "est_cost_usd": round(cost, 4),
