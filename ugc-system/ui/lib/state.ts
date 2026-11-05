@@ -4,9 +4,10 @@
    - Engine output is data, never state we mutate: BRIEF_OK / REDRESS_OK merge
      through mergeBrief() so operator locks survive re-dress.
    - runId guards against stale async responses (runs and redress both bump it).
-   - Escalations are derived from the *effective* decisions (post-lock) using
-     the same wording as orchestrator.escalation_list — the gate itself always
-     comes from the engine.
+   - Escalations are the engine's verbatim lines (orchestrator.escalation_list);
+     visibleEscalations() only filters lines whose head verb is locked, and
+     applyLocks() prunes acks so unlocking re-opens the exact engine line —
+     wording never lives in the UI.
 */
 import type {
   ActiveStage,
@@ -104,6 +105,7 @@ export type Action =
   | { type: "OVERRIDE_START"; runId: number }
   | { type: "BRIEF_OK"; runId: number; brief: Brief; analysis?: Analysis | null }
   | { type: "RUN_FAIL"; runId: number; cmd: string; message: string }
+  | { type: "RUN_CANCEL" }
   | { type: "REDRESS_START" }
   | { type: "REDRESS_OK"; style: StylePlan; expressions: ExpressionPlan; decisions: { outfit: Decision | null; expression: Decision | null }; escalations: string[] }
   | { type: "REDRESS_FAIL"; cmd: string; message: string }
@@ -267,6 +269,19 @@ export function reducer(state: ConsoleState, action: Action): ConsoleState {
       };
     }
 
+    case "RUN_CANCEL": {
+      // Operator cancel: the component aborts the fetch, and bumping runId
+      // here guarantees any late response from the cancelled run is stale.
+      // Existing output is kept — cancel discards the run, not the session.
+      if (state.phase !== "running" && state.phase !== "overriding") return state;
+      return {
+        ...state,
+        phase: state.brief ? "ready" : "idle",
+        activeStage: null,
+        runId: state.runId + 1,
+      };
+    }
+
     case "REDRESS_START":
       if (!state.brief || (state.phase !== "ready" && state.phase !== "redressing")) return state;
       return { ...state, phase: "redressing", activeStage: "redress" };
@@ -379,6 +394,14 @@ export function reducer(state: ConsoleState, action: Action): ConsoleState {
 
 export const openEscalations = (s: ConsoleState): string[] =>
   visibleEscalations(s.brief, s.locks).filter((e) => !s.ackedEscalations.includes(e));
+
+/** Idea-only run: a brief landed with no analysis because the analyzer was
+    skipped (no reel to score). Stations must show "skipped", never a claim
+    that decisions cleared to automate. */
+export const analyzeSkipped = (s: ConsoleState): boolean =>
+  s.brief !== null &&
+  !s.analysis &&
+  (s.phase === "ready" || s.phase === "overriding" || s.phase === "redressing");
 
 export const canRun = (s: ConsoleState): boolean =>
   Boolean(

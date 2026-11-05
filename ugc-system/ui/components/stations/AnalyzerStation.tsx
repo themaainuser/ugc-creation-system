@@ -2,6 +2,7 @@
    The Verdict stamp is the effective call; the JEV card under it carries
    the full distribution plus the operator's lock/override controls. */
 import type { ConsoleState, Lock } from "../../lib/state";
+import { analyzeSkipped } from "../../lib/state";
 import type { Analysis, Decision, VerdictMode } from "../../lib/types";
 import { pct } from "../../lib/format";
 import { DecisionCard } from "../DecisionCard";
@@ -20,6 +21,9 @@ export function AnalyzerStation({ state, analysis, decision, lock, onToggleLock,
   const { phase, brief } = state;
   const running = phase === "running" && state.activeStage === "analyze";
   const building = (phase === "running" || phase === "overriding") && state.activeStage !== "analyze";
+  // Idea-only run: the analyzer was skipped (no reel to score) — the station
+  // says so instead of pretending analysis is merely pending or cleared.
+  const skipped = analyzeSkipped(state);
   // Effective call: operator lock > brief mode (engine-derived from the
   // calibrated decision) > the JEV decision itself > heuristic typing last.
   const effectiveVerdict: VerdictMode | null = (lock?.choice
@@ -34,16 +38,23 @@ export function AnalyzerStation({ state, analysis, decision, lock, onToggleLock,
       id="station-analyzer"
       idx="02"
       title="Analyzer"
-      stamp={running ? "Scanning" : building ? "Queued" : analysis ? "Complete" : undefined}
+      stamp={running ? "Scanning" : building ? "Queued" : analysis ? "Complete" : skipped ? "Skipped" : undefined}
       stampTone={running ? "active" : "done"}
     >
       {running ? (
         <SkeletonStack n={4} />
       ) : !analysis ? (
-        <Empty
-          title="No analysis yet"
-          hint="Run the line to score the Hook, Flow/Beats, Ending, and Verdict. Live engine output only — nothing is pre-filled."
-        />
+        skipped ? (
+          <Empty
+            title="Skipped — idea-only run"
+            hint="No reel to analyse on an idea-only line, so there is no Verdict score. The brief is built from the idea + persona alone."
+          />
+        ) : (
+          <Empty
+            title="No analysis yet"
+            hint="Run the line to score the Hook, Flow/Beats, Ending, and Verdict. Live engine output only — nothing is pre-filled."
+          />
+        )
       ) : (
         <>
           <div className="hook-card">
@@ -116,7 +127,9 @@ export function AnalyzerStation({ state, analysis, decision, lock, onToggleLock,
           <DecisionCard
             title="Verdict"
             decision={decision}
-            emptyNote="The Verdict decision appears after the analyze step."
+            emptyNote={skipped
+              ? "Idea-only brief — no reel to score, so no Verdict decision."
+              : "The Verdict decision appears after the analyze step."}
             lock={lock}
             effectiveChoice={effectiveVerdict}
             onToggleLock={onToggleLock}

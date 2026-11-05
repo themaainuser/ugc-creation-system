@@ -138,7 +138,7 @@ button { font: inherit; }
   flex-shrink: 0;
 }
 
-.brand-name { font-size: 15px; font-weight: 700; letter-spacing: -0.02em; white-space: nowrap; }
+.brand-name { font-size: 15px; font-weight: 700; letter-spacing: -0.02em; white-space: nowrap; margin: 0; }
 
 .brand-mode {
   font-family: var(--font-mono), monospace;
@@ -256,7 +256,7 @@ button { font: inherit; }
 }
 .stagenode:hover { color: var(--text-2); background: var(--surface); }
 
-.sn-idx { font-size: 10px; color: var(--faint); }
+.sn-idx { font-size: 10.5px; color: var(--faint); }
 .sn-label { font-size: 12.5px; font-weight: 600; letter-spacing: -0.01em; }
 .sn-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--line-strong); flex-shrink: 0; }
 .sn-state {
@@ -280,6 +280,13 @@ button { font: inherit; }
 .stagenode.error { color: var(--danger); border-color: rgba(229, 72, 77, 0.45); }
 .stagenode.error .sn-dot { background: var(--danger); }
 .stagenode.error .sn-state { color: var(--danger); }
+/* idea-only run: the analyzer never had a reel to score — muted, not "done" */
+.stagenode.skipped { color: var(--faint); border-style: dashed; }
+.stagenode.skipped .sn-dot { background: transparent; box-shadow: inset 0 0 0 1px var(--faint); }
+.stagenode.skipped .sn-state { color: var(--faint); }
+
+/* per-station failure isolation (StationBoundary) */
+.station-failed { border-color: rgba(229, 72, 77, 0.45); }
 .stagenode.current { background: var(--accent-soft); }
 
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
@@ -630,7 +637,7 @@ button { font: inherit; }
 }
 .beat:last-child { border-bottom: none; }
 .beat .ts { font-family: var(--font-mono), monospace; font-size: 11.5px; color: var(--accent); font-variant-numeric: tabular-nums; padding-top: 2px; white-space: nowrap; }
-.beat .purpose { font-family: var(--font-mono), monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.beat .purpose { font-family: var(--font-mono), monospace; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 .beat .what { font-size: 13px; color: var(--text); line-height: 1.5; margin-top: 2px; }
 .beat .tech { font-size: 12px; color: var(--faint); margin-top: 2px; }
 
@@ -853,7 +860,7 @@ button { font: inherit; }
 .simple-list li { font-size: 12.5px; color: var(--text-2); padding-left: 14px; position: relative; }
 .simple-list li::before { content: "–"; position: absolute; left: 0; color: var(--faint); }
 .simple-list.avoid li { color: var(--danger-ink); }
-.simple-list.avoid li::before { content: "✕"; color: var(--danger); font-size: 10px; top: 2px; }
+.simple-list.avoid li::before { content: "✕"; color: var(--danger); font-size: 10.5px; top: 2px; }
 
 .audio-note {
   font-size: 12.5px;
@@ -1106,6 +1113,15 @@ button { font: inherit; }
   .console { grid-template-columns: minmax(300px, 350px) minmax(0, 1fr) minmax(280px, 320px); gap: 14px; }
 }
 
+/* Health LEDs must never be clipped by the fixed 56px topbar: below 1360px
+   the rail stacks (brand row, then a full-width health row) and the stage
+   rail un-sticks so nothing paints over anything. */
+@media (max-width: 1359px) {
+  .topbar { position: static; height: auto; flex-wrap: wrap; gap: 10px; padding: 10px 20px; }
+  .health { flex: 0 0 100%; order: 3; justify-content: flex-start; }
+  .stagerail { position: static; height: auto; padding: 8px 20px; }
+}
+
 @media (max-width: 1240px) {
   .console { grid-template-columns: minmax(300px, 360px) minmax(0, 1fr); }
   .ledger { grid-column: 1 / -1; position: static; max-height: none; overflow: visible; }
@@ -1123,6 +1139,13 @@ button { font: inherit; }
   .errorbar { margin: 12px 14px 0; }
   .jev-opt { grid-template-columns: minmax(70px, 110px) 1fr 48px auto; }
   .foot { padding: 0 14px 16px; }
+}
+
+/* Stage nodes stay full-label and the rail scrolls sideways instead of
+   letting nowrap labels overflow their shrunken flex boxes (overlap ≤760px). */
+@media (max-width: 760px) {
+  .stagenodes { width: max-content; min-width: 100%; }
+  .stagenode-item { flex: 0 0 auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {

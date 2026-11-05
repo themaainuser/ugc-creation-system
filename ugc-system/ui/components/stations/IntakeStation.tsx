@@ -12,6 +12,7 @@ interface Props {
   state: ConsoleState;
   onDraft: (patch: Partial<ConsoleState["draft"]>) => void;
   onRun: () => void;
+  onCancel: () => void;
   canRun: boolean;
   onScanned: () => void;
 }
@@ -41,7 +42,7 @@ function MdepQuad({ mdep, onChange }: { mdep: MDEP; onChange: (m: MDEP) => void 
   );
 }
 
-export function IntakeStation({ state, onDraft, onRun, canRun, onScanned }: Props) {
+export function IntakeStation({ state, onDraft, onRun, onCancel, canRun, onScanned }: Props) {
   const { draft, phase, personas } = state;
   const [scanning, setScanning] = useState(false);
   const [scanMsg, setScanMsg] = useState("");
@@ -145,6 +146,15 @@ export function IntakeStation({ state, onDraft, onRun, canRun, onScanned }: Prop
           <Btn variant="primary" onClick={onRun} disabled={!canRun || running} loading={running}>
             {runLabel}
           </Btn>
+          {running && (
+            <Btn
+              variant="secondary"
+              onClick={onCancel}
+              title="Abort the in-flight run — keeps whatever is already on screen"
+            >
+              Cancel
+            </Btn>
+          )}
         </div>
         {!draft.personaId && <p className="hint">No persona loaded — check the engine is reachable.</p>}
         {draft.personaId && !draft.transcript.trim() && !draft.idea.trim() && (

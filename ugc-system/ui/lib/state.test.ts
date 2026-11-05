@@ -1,6 +1,6 @@
 /* Reducer smoke test — compiles against lib/state.ts and asserts the
    pipeline transitions, lock survival, and escalation derivation. */
-import { reducer, initialState, decisionFor, openEscalations, canRun } from "./state";
+import { reducer, initialState, decisionFor, openEscalations, canRun, analyzeSkipped } from "./state";
 import type { Action, ConsoleState, Draft } from "./state";
 import type { Analysis, Brief, Decision } from "./types";
 
@@ -143,6 +143,34 @@ ok("RESET keeps personas, clears output", reset.personas.length === 1 && reset.b
 // 10. outcome records
 const withOutcome = reducer(s, { type: "OUTCOME_OK", outcome: { verb: "verdict", option: "remix", brier: 0.31, at: 3 } });
 ok("OUTCOME_OK stores outcome", withOutcome.outcome?.brier === 0.31);
+
+// 11. idea-only run: brief lands with NO analysis — skipped, never "cleared"
+let idea: ConsoleState = reducer(initialState, { type: "META_OK", personas: [{ id: "aria", name: "Aria" }], health: null });
+idea = reducer(idea, { type: "DRAFT_SET", patch: draft({ transcript: "", idea: "same script, thrift store" }) });
+idea = reducer(idea, { type: "RUN_START", runId: 1 });
+ok("idea-only run starts", idea.phase === "running" && idea.analysis === null);
+idea = reducer(idea, { type: "BRIEF_OK", runId: 1, brief: mkBrief(), analysis: null });
+ok("idea-only BRIEF_OK → ready, analysis stays null", idea.phase === "ready" && idea.analysis === null);
+ok("analyzeSkipped true on idea-only brief", analyzeSkipped(idea));
+ok("idea-only: no open escalations claimed", openEscalations(idea).length === 0, JSON.stringify(openEscalations(idea)));
+
+// 12. RUN_CANCEL aborts the run but keeps the session
+let c: ConsoleState = reducer(initialState, { type: "META_OK", personas: [{ id: "aria", name: "Aria" }], health: null });
+c = reducer(c, { type: "DRAFT_SET", patch: draft() });
+c = reducer(c, { type: "RUN_START", runId: 5 });
+c = reducer(c, { type: "ANALYZE_OK", runId: 5, analysis, decision: decision("verdict", "remix", "escalate", 0.55) });
+c = reducer(c, { type: "RUN_CANCEL" });
+ok("RUN_CANCEL → idle, keeps completed analysis", c.phase === "idle" && c.analysis !== null && c.activeStage === null);
+ok("RUN_CANCEL bumps runId so late responses are stale", c.runId === 6, `runId=${c.runId}`);
+ok("late BRIEF_OK from cancelled run ignored", reducer(c, { type: "BRIEF_OK", runId: 5, brief: mkBrief(), analysis }) === c);
+ok("RUN_CANCEL no-op outside a run", reducer(c, { type: "RUN_CANCEL" }) === c);
+
+// 12b. cancel during an override keeps the existing brief
+c = reducer(c, { type: "RUN_START", runId: 7 });
+c = reducer(c, { type: "BRIEF_OK", runId: 7, brief: mkBrief(), analysis });
+c = reducer(c, { type: "OVERRIDE_START", runId: 8 });
+c = reducer(c, { type: "RUN_CANCEL" });
+ok("cancel during override → ready with brief", c.phase === "ready" && c.brief !== null);
 
 console.log(failures === 0 ? "\nALL PASS" : `\n${failures} FAILED`);
 process.exit(failures === 0 ? 0 : 1);

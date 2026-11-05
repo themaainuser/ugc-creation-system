@@ -35,7 +35,7 @@ export function TopRail({ personas, personaId, health, onPersona, onRefresh }: P
     <header className="topbar">
       <div className="brand">
         <span className="brand-mark" aria-hidden="true">UG</span>
-        <span className="brand-name">UGC Factory</span>
+        <h1 className="brand-name">UGC Factory</h1>
         <span className="brand-mode">Operate</span>
       </div>
 
@@ -64,16 +64,24 @@ export function TopRail({ personas, personaId, health, onPersona, onRefresh }: P
       <div className="health" aria-label="engine health" aria-live="polite">
         <Led ok={health?.jev} warn={health ? !health.jev : undefined} label="JEV"
              value={health ? (health.jev ? shortModel(health.models?.jev) || "online" : "local") : "…"}
-             title={health?.models?.jev
-               ? `Remote Jev decisions — ${health.models.jev} via OpenRouter`
-               : "Local Platt scorer (no remote JEV configured)"} />
+             title={!health
+               ? "Checking engine — press Refresh to retry"
+               : health.models?.jev
+                 ? `Remote Jev decisions — ${health.models.jev} via OpenRouter`
+                 : "Local Platt scorer (no remote JEV configured)"} />
         <Led ok={health?.llm} warn={health ? !health.llm : undefined} label="LLM"
              value={health ? (health.llm ? shortModel(health.models?.llm) || "configured" : "off") : "…"}
-             title={health?.models?.llm
-               ? `Reel typing / prompt generation — ${health.models.llm} via OpenRouter`
-               : "Heuristic analyzer (no LLM configured)"} />
-        <Led ok label="Assets" value={health ? String(health.assets) : "…"} />
-        <Led ok label="Personas" value={health ? String(health.personas) : "…"} />
+             title={!health
+               ? "Checking engine — press Refresh to retry"
+               : health.models?.llm
+                 ? `Reel typing / prompt generation — ${health.models.llm} via OpenRouter`
+                 : "Heuristic analyzer (no LLM configured)"} />
+        <Led ok={!!health} warn={health ? false : undefined} label="Assets"
+             value={health ? String(health.assets) : "…"}
+             title={health ? "Assets in the scanned wardrobe library" : "Checking engine — press Refresh to retry"} />
+        <Led ok={!!health} warn={health ? false : undefined} label="Personas"
+             value={health ? String(health.personas) : "…"}
+             title={health ? "Persona YAMLs loaded by the engine" : "Checking engine — press Refresh to retry"} />
       </div>
 
       <div className="top-actions">

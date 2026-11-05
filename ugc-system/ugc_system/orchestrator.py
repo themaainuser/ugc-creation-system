@@ -23,8 +23,8 @@ def escalation_list(verdict_decision=None, outfit_decision=None,
     """Operator review queue: anything gated "escalate" plus empty wardrobe.
 
     Single source of truth for escalation wording — build_brief and the
-    bridge's plan-day both go through here (the UI re-derives the same lines
-    from the *effective* decisions after operator locks).
+    bridge's plan-day both go through here, and the UI stores these lines
+    verbatim (it only filters them by operator locks, never re-words them).
     """
     out: list[str] = []
     for label, d in (("verdict", verdict_decision), ("outfit", outfit_decision),

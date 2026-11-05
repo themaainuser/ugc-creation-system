@@ -29,7 +29,7 @@ export function DecisionCard({
 }: Props) {
   if (!decision) {
     return (
-      <div className="jev" aria-label={`${title} JEV Decision`}>
+      <div className="jev" role="group" aria-label={`${title} JEV Decision`}>
         <div className="jev-head">
           <span className="verb">JEV · {title}</span>
           <span className="spacer" />
@@ -53,7 +53,7 @@ export function DecisionCard({
     : decision.confidence;
 
   return (
-    <div className={`jev ${lock ? "locked" : ""}`} aria-label={`${title} JEV Decision`}>
+    <div className={`jev ${lock ? "locked" : ""}`} role="group" aria-label={`${title} JEV Decision`}>
       <div className="jev-head">
         <span className="verb">JEV · {title}</span>
         <span className="chosen">{effective}</span>
@@ -119,7 +119,11 @@ export function DecisionCard({
         <div className="jev-meta tnum">
           calibrated: {decision.calibrated ? "yes" : "no"}
           {decision.brier_estimate != null && <> · brier≈{decision.brier_estimate.toFixed(3)}</>}
-          <span className="meta-note">scores are calibrated, not raw sorts</span>
+          <span className="meta-note">
+            {decision.calibrated
+              ? "scores are calibrated, not raw sorts"
+              : "local fallback — Platt defaults, not fitted"}
+          </span>
         </div>
 
         <div className="jev-lockrow">

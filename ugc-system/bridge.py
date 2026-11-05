@@ -205,8 +205,13 @@ def handle(cmd: str, payload: dict):
         brief = payload.get("brief")
         if not isinstance(brief, dict) or not brief.get("persona_id"):
             raise ValueError("save-brief requires a brief object with persona_id")
+        # The persona id becomes a filename — strip anything path-shaped so a
+        # crafted brief can never write outside data/briefs/.
+        pid = re.sub(r"[^A-Za-z0-9_-]", "_", str(brief["persona_id"])).strip("_")
+        if not pid or pid.startswith("."):
+            raise ValueError("save-brief: persona_id is not a usable filename")
         day = str(date.today())
-        out_path = ROOT / "data" / "briefs" / f"{brief['persona_id']}_{day}.json"
+        out_path = ROOT / "data" / "briefs" / f"{pid}_{day}.json"
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(json.dumps(brief, ensure_ascii=False, indent=2),
                             encoding="utf-8")

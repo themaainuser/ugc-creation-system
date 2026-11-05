@@ -1,8 +1,47 @@
 /* Shared console primitives — every station composes from these.
    Visual rules: hairline borders, mono numerals, motion ≤150ms, no bounce. */
-import type { ReactNode } from "react";
+import { Component } from "react";
+import type { ErrorInfo, ReactNode } from "react";
 
 export type StampTone = "active" | "done" | "warn" | "error";
+
+/** Per-station error boundary: one station's render fault shows an inline
+    alert instead of unmounting the whole console. */
+export class StationBoundary extends Component<
+  { label: string; children: ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error(`[station:${this.props.label}]`, error, info.componentStack);
+  }
+
+  render() {
+    if (this.state.failed) {
+      return (
+        <div className="station station-failed" role="alert">
+          <header className="station-head">
+            <h2>{this.props.label}</h2>
+            <span className="spacer" />
+            <span className="status-pill error">render error</span>
+          </header>
+          <div className="station-body">
+            <p className="empty-note">
+              This station hit a render error — the rest of the console is
+              unaffected. Refresh the page or Reset the console to recover.
+            </p>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 /** One numbered station of the assembly line. */
 export function Station({

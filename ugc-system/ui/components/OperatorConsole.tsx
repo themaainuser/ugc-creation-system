@@ -29,6 +29,7 @@ import type {
 import { TopRail } from "./shell/TopRail";
 import { StageRail } from "./shell/StageRail";
 import { Ledger } from "./shell/Ledger";
+import { StationBoundary } from "./ui";
 import { IntakeStation } from "./stations/IntakeStation";
 import { AnalyzerStation } from "./stations/AnalyzerStation";
 import { StylistStation } from "./stations/StylistStation";
@@ -66,12 +67,21 @@ export default function OperatorConsole() {
       ]);
       dispatch({ type: "META_OK", personas: p.personas, health: h });
     } catch (e) {
-      dispatch({ type: "ERROR_PUSH", cmd: "personas", message: errText(e) });
+      // Poll retries hit this too — dedupe so a dead bridge shows one error
+      // instead of one every 30 seconds.
+      const message = errText(e);
+      const last = stateRef.current.errors.at(-1);
+      if (last?.cmd === "personas" && last.message === message) return;
+      dispatch({ type: "ERROR_PUSH", cmd: "personas", message });
     }
   }, []);
 
   useEffect(() => {
     void loadMeta();
+    // Liveness: re-check health every 30s so LEDs reflect the engine without
+    // waiting for the operator to press Refresh.
+    const t = window.setInterval(() => void loadMeta(), 30_000);
+    return () => window.clearInterval(t);
   }, [loadMeta]);
 
   /* ---------- persistence (debounced view-cache) ---------- */
@@ -188,6 +198,18 @@ export default function OperatorConsole() {
       if (isAbort(e)) return;
       dispatch({ type: "RUN_FAIL", runId, cmd, message: errText(e) });
     }
+  }, []);
+
+  /* ---------- operator cancel: abort the fetch, stale-guard the rest ---------- */
+
+  const cancelRun = useCallback(() => {
+    runRef.current.ac?.abort();
+    redressRef.current.ac?.abort();
+    redressRef.current.seq += 1;
+    // Component counter and reducer runId both move past the cancelled run,
+    // so nothing it produces can land afterwards.
+    ++runRef.current.runId;
+    dispatch({ type: "RUN_CANCEL" });
   }, []);
 
   /* ---------- shared: rebuild the brief with a given Verdict mode ---------- */
@@ -333,7 +355,15 @@ export default function OperatorConsole() {
         personas={s.personas}
         personaId={s.draft.personaId}
         health={s.health}
-        onPersona={(id) => dispatch({ type: "DRAFT_SET", patch: { personaId: id } })}
+        onPersona={(id) => {
+          if (id !== s.draft.personaId) {
+            // persona switch abandons the line — stop paying for its calls
+            runRef.current.ac?.abort();
+            redressRef.current.ac?.abort();
+            redressRef.current.seq += 1;
+          }
+          dispatch({ type: "DRAFT_SET", patch: { personaId: id } });
+        }}
         onRefresh={() => void loadMeta()}
       />
 
@@ -359,37 +389,48 @@ export default function OperatorConsole() {
       )}
 
       <main className="console" id="main" tabIndex={-1}>
-        <IntakeStation
-          state={s}
-          onDraft={(patch) => dispatch({ type: "DRAFT_SET", patch })}
-          onRun={() => void runLine()}
-          canRun={canRunSel(s)}
-          onScanned={() => void loadMeta()}
-        />
+        <StationBoundary label="Intake">
+          <IntakeStation
+            state={s}
+            onDraft={(patch) => dispatch({ type: "DRAFT_SET", patch })}
+            onRun={() => void runLine()}
+            onCancel={cancelRun}
+            canRun={canRunSel(s)}
+            onScanned={() => void loadMeta()}
+          />
+        </StationBoundary>
 
         <div className="col col-line">
-          <AnalyzerStation
-            state={s}
-            analysis={s.analysis}
-            decision={verdict.decision}
-            lock={verdict.lock}
-            onToggleLock={() => toggleLock("verdict")}
-            onOverride={(c) => void overrideVerdict(c)}
-          />
-          <StylistStation
-            state={s}
-            decision={outfit.decision}
-            lock={outfit.lock}
-            onToggleLock={() => toggleLock("outfit")}
-            onJumpIntake={() => jump("station-intake")}
-          />
-          <ExpressionStation
-            state={s}
-            decision={expression.decision}
-            lock={expression.lock}
-            onToggleLock={() => toggleLock("expression")}
-          />
-          <DispatchStation state={s} />
+          <StationBoundary label="Analyzer">
+            <AnalyzerStation
+              state={s}
+              analysis={s.analysis}
+              decision={verdict.decision}
+              lock={verdict.lock}
+              onToggleLock={() => toggleLock("verdict")}
+              onOverride={(c) => void overrideVerdict(c)}
+            />
+          </StationBoundary>
+          <StationBoundary label="Stylist">
+            <StylistStation
+              state={s}
+              decision={outfit.decision}
+              lock={outfit.lock}
+              onToggleLock={() => toggleLock("outfit")}
+              onJumpIntake={() => jump("station-intake")}
+            />
+          </StationBoundary>
+          <StationBoundary label="Expression">
+            <ExpressionStation
+              state={s}
+              decision={expression.decision}
+              lock={expression.lock}
+              onToggleLock={() => toggleLock("expression")}
+            />
+          </StationBoundary>
+          <StationBoundary label="Dispatch">
+            <DispatchStation state={s} />
+          </StationBoundary>
         </div>
 
         <Ledger

@@ -3,7 +3,7 @@
    Full detail lives in the stations; this is the operator's at-a-glance queue. */
 import { useEffect, useMemo, useState } from "react";
 import type { ConsoleState, DecisionVerb } from "../../lib/state";
-import { decisionFor, openEscalations } from "../../lib/state";
+import { analyzeSkipped, decisionFor, openEscalations } from "../../lib/state";
 import type { Decision } from "../../lib/types";
 import { pct } from "../../lib/format";
 import { Btn, Chip } from "../ui";
@@ -41,6 +41,7 @@ function DecisionRow({
   decision,
   effective,
   locked,
+  skipped,
   onToggleLock,
   onJump,
   busy,
@@ -49,6 +50,7 @@ function DecisionRow({
   decision: Decision | null;
   effective: string | null;
   locked: boolean;
+  skipped: boolean;
   onToggleLock: () => void;
   onJump: () => void;
   busy: boolean;
@@ -89,7 +91,9 @@ function DecisionRow({
           </button>
         </>
       ) : (
-        <span className="lr-empty">no decision yet</span>
+        <span className="lr-empty">
+          {verb === "verdict" && skipped ? "not scored — no reel" : "no decision yet"}
+        </span>
       )}
     </li>
   );
@@ -97,6 +101,8 @@ function DecisionRow({
 
 export function Ledger({ state, onToggleLock, onJump, onAck, onSaveOutcome, onReset }: Props) {
   const escalations = openEscalations(state);
+  // Idea-only brief: nothing was scored, so don't claim decisions "cleared".
+  const skipped = analyzeSkipped(state);
   const verbs: DecisionVerb[] = ["verdict", "outfit", "expression"];
   const available = useMemo(
     () => verbs.filter((v) => decisionFor(state, v).decision),
@@ -150,6 +156,7 @@ export function Ledger({ state, onToggleLock, onJump, onAck, onSaveOutcome, onRe
               decision={decision}
               effective={effective}
               locked={Boolean(lock)}
+              skipped={skipped}
               busy={state.phase === "running" || state.phase === "overriding"}
               onToggleLock={() => onToggleLock(v)}
               onJump={() => onJump(VERB_STATION[v])}
@@ -161,7 +168,11 @@ export function Ledger({ state, onToggleLock, onJump, onAck, onSaveOutcome, onRe
       <section className="ledger-block" aria-labelledby="esc-h">
         <h3 id="esc-h">Escalations</h3>
         {escalations.length === 0 ? (
-          <p className="esc-clear">✓ No open escalations — decisions cleared to automate or locked by operator.</p>
+          <p className="esc-clear">
+            {skipped
+              ? "✓ No open escalations — idea-only brief, nothing was scored."
+              : "✓ No open escalations — decisions cleared to automate or locked by operator."}
+          </p>
         ) : (
           <ul className="esc-list">
             {escalations.map((e) => (
@@ -169,7 +180,8 @@ export function Ledger({ state, onToggleLock, onJump, onAck, onSaveOutcome, onRe
                 <span className="ico" aria-hidden="true">!</span>
                 <span className="esc-text">{e}</span>
                 <span className="esc-actions">
-                  <button type="button" className="mini" onClick={() => onJump(ESC_STATION[e.split(":")[0]] ?? "station-dispatch")}>
+                  <button type="button" className="mini"
+                          onClick={() => onJump(ESC_STATION[e.split(":")[0].trim().toLowerCase()] ?? "station-dispatch")}>
                     Review
                   </button>
                   <button type="button" className="mini" onClick={() => onAck(e)}>Ack</button>

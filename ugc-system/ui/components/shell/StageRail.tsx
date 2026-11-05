@@ -1,8 +1,8 @@
 /* StageRail — the assembly line made visible.
    Five nodes: Intake → Analyzer → Stylist → Expression → Dispatch.
-   States: idle | running | done | escalate | error. Click jumps to the station. */
+   States: idle | running | done | skipped | escalate | error. Click jumps to the station. */
 import type { ConsoleState } from "../../lib/state";
-import { openEscalations } from "../../lib/state";
+import { analyzeSkipped, openEscalations } from "../../lib/state";
 import type { ActiveStage, Stage } from "../../lib/types";
 
 interface NodeDef {
@@ -20,7 +20,7 @@ const NODES: NodeDef[] = [
   { stage: "dispatch", idx: "05", label: "Dispatch", station: "station-dispatch" },
 ];
 
-type NodeState = "idle" | "running" | "done" | "escalate" | "error";
+type NodeState = "idle" | "running" | "done" | "skipped" | "escalate" | "error";
 
 const ESC_STAGE: Record<string, Stage> = {
   verdict: "analyze",
@@ -38,6 +38,7 @@ function liveText(s: ConsoleState): string {
     case "redressing":
       return "Re-dressing — style and expression updating";
     case "ready":
+      if (analyzeSkipped(s)) return "idea-only brief — no reel analysed";
       return openEscalations(s).length
         ? `Line ready — ${openEscalations(s).length} escalation(s) need review`
         : "Line ready — all decisions cleared to automate";
@@ -56,7 +57,10 @@ export function StageRail({
   const { phase, activeStage, analysis, brief, errors } = state;
   const lastCmd = errors.at(-1)?.cmd;
   const openEsc = openEscalations(state);
-  const escStages = new Set(openEsc.map((e) => ESC_STAGE[e.split(":")[0]] ?? "dispatch"));
+  const escStages = new Set(
+    openEsc.map((e) => ESC_STAGE[e.split(":")[0].trim().toLowerCase()] ?? "dispatch"),
+  );
+  const skipped = analyzeSkipped(state);
 
   const stateFor = (stage: Stage): NodeState => {
     // escalations tint completed nodes until acknowledged
@@ -68,17 +72,22 @@ export function StageRail({
         if (stage === "analyze") return "running";
         return stage === "intake" ? "done" : "idle";
       }
-      // building the brief
-      if (stage === "intake" || stage === "analyze") return "done";
+      // building the brief — the analyzer only counts as done if it ran
+      if (stage === "intake") return "done";
+      if (stage === "analyze") return analysis ? "done" : "skipped";
       if (phase === "overriding") return "running";
       return activeStage === "build" ? "running" : "idle";
     }
     if (phase === "redressing") {
       if (stage === "style" || stage === "express") return "running";
-      if (stage === "intake" || stage === "analyze") return "done";
+      if (stage === "intake") return "done";
+      if (stage === "analyze") return analysis ? "done" : "skipped";
       return "idle"; // dispatch keeps its previous state below
     }
-    if (phase === "ready") return tint("done");
+    if (phase === "ready") {
+      if (stage === "analyze" && skipped) return "skipped";
+      return tint("done");
+    }
     // idle — a failed run leaves its mark on the node it died in
     if (errors.length && lastCmd) {
       if (lastCmd === "analyze" && stage === "analyze") return "error";
@@ -116,12 +125,13 @@ export function StageRail({
                 className={`stagenode ${st} ${current ? "current" : ""}`}
                 onClick={() => onJump(n.station)}
                 aria-current={current ? "step" : undefined}
+                aria-label={`${n.idx} ${n.label} — ${st}`}
                 title={`Jump to ${n.label}`}
               >
                 <span className="sn-idx tnum">{n.idx}</span>
                 <span className="sn-label">{n.label}</span>
                 <span className="sn-dot" aria-hidden="true" />
-                <span className="sn-state">{st === "escalate" ? "escalate" : st === "running" ? "running" : st === "error" ? "error" : st === "done" ? "done" : "idle"}</span>
+                <span className="sn-state">{st}</span>
               </button>
             </li>
           );
