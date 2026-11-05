@@ -149,5 +149,7 @@ def audio_profile(wav: Path, duration: float) -> dict:
         "mean_volume_db": float(mean.group(1)) if mean else None,
         "max_volume_db": float(peak.group(1)) if peak else None,
         "silences": silences[:40],
+        # every silence midpoint, so long recordings can be split between words
+        "cut_points": [round((a + b) / 2, 2) for a, b in silences],
         "silent_ratio": round(silent_total / duration, 3) if duration else None,
     }

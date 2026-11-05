@@ -1,14 +1,35 @@
 {
-  "category": "bottom",
-  "brands": [
-    "Zara"
-  ],
+  "subcategory": "",
   "colors": [
-    "blue"
+    {
+      "name": "blue",
+      "hex": "#2f6fd6"
+    }
   ],
+  "pattern": "solid",
+  "material": "",
+  "occasions": [],
+  "seasons": [],
+  "description": "",
+  "story": "",
+  "statement": 0.3,
+  "warmth": 2,
+  "formality": 3,
+  "gender_expression": "neutral",
   "style_tags": [
     "casual",
     "streetwear"
   ],
-  "formality": 3
+  "category": "bottom",
+  "brand": "Zara",
+  "tier": "high_street",
+  "name": "Levi Casual Jeans",
+  "tagged_by": "legacy",
+  "pixel_colors": [
+    {
+      "name": "denim",
+      "hex": "#3c50a0",
+      "share": 1.0
+    }
+  ]
 }

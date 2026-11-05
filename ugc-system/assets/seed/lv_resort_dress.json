@@ -1,15 +1,36 @@
 {
-  "category": "full-fit",
-  "brands": [
-    "lv"
-  ],
+  "subcategory": "",
   "colors": [
-    "gold"
+    {
+      "name": "gold",
+      "hex": "#d4af37"
+    }
   ],
+  "pattern": "solid",
+  "material": "",
+  "occasions": [],
+  "seasons": [],
+  "description": "",
+  "story": "",
+  "statement": 0.3,
+  "warmth": 2,
+  "formality": 9,
+  "gender_expression": "feminine",
   "style_tags": [
     "formal",
     "statement",
     "resort"
   ],
-  "formality": 9
+  "category": "dress",
+  "brand": "lv",
+  "tier": "luxury",
+  "name": "Lv Resort Dress",
+  "tagged_by": "legacy",
+  "pixel_colors": [
+    {
+      "name": "mustard",
+      "hex": "#c8a028",
+      "share": 1.0
+    }
+  ]
 }

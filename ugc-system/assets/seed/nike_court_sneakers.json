@@ -1,14 +1,29 @@
 {
-  "category": "footwear",
-  "brands": [
-    "Nike"
-  ],
+  "subcategory": "sneakers",
   "colors": [
-    "white"
+    {
+      "name": "white",
+      "hex": "#f7f7f5"
+    }
   ],
+  "pattern": "solid",
+  "material": "",
+  "occasions": [],
+  "seasons": [],
+  "description": "",
+  "story": "",
+  "statement": 0.3,
+  "warmth": 2,
+  "formality": 3,
+  "gender_expression": "neutral",
   "style_tags": [
     "streetwear",
     "athletic"
   ],
-  "formality": 3
+  "category": "footwear",
+  "brand": "Nike",
+  "tier": "sportswear",
+  "name": "Nike Court Sneakers",
+  "tagged_by": "legacy",
+  "pixel_colors": []
 }

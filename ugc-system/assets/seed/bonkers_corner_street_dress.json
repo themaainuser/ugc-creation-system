@@ -1,14 +1,35 @@
 {
-  "category": "full-fit",
-  "brands": [
-    "Bonkers Corner"
-  ],
+  "subcategory": "",
   "colors": [
-    "black"
+    {
+      "name": "black",
+      "hex": "#111111"
+    }
   ],
+  "pattern": "solid",
+  "material": "",
+  "occasions": [],
+  "seasons": [],
+  "description": "",
+  "story": "",
+  "statement": 0.3,
+  "warmth": 2,
+  "formality": 4,
+  "gender_expression": "feminine",
   "style_tags": [
     "streetwear",
     "casual"
   ],
-  "formality": 4
+  "category": "dress",
+  "brand": "Bonkers Corner",
+  "tier": "streetwear",
+  "name": "Bonkers Corner Street Dress",
+  "tagged_by": "legacy",
+  "pixel_colors": [
+    {
+      "name": "black",
+      "hex": "#1e1e1e",
+      "share": 1.0
+    }
+  ]
 }

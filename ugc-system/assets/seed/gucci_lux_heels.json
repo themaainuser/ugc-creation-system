@@ -1,14 +1,35 @@
 {
-  "category": "footwear",
-  "brands": [
-    "Gucci"
-  ],
+  "subcategory": "heels",
   "colors": [
-    "black"
+    {
+      "name": "black",
+      "hex": "#111111"
+    }
   ],
+  "pattern": "solid",
+  "material": "",
+  "occasions": [],
+  "seasons": [],
+  "description": "",
+  "story": "",
+  "statement": 0.3,
+  "warmth": 2,
+  "formality": 9,
+  "gender_expression": "feminine",
   "style_tags": [
     "statement",
     "formal"
   ],
-  "formality": 9
+  "category": "footwear",
+  "brand": "Gucci",
+  "tier": "luxury",
+  "name": "Gucci Lux Heels",
+  "tagged_by": "legacy",
+  "pixel_colors": [
+    {
+      "name": "black",
+      "hex": "#141414",
+      "share": 1.0
+    }
+  ]
 }

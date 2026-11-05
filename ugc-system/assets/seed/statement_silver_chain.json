@@ -1,14 +1,35 @@
 {
-  "category": "jewelry",
-  "brands": [
-    "Nike"
-  ],
+  "subcategory": "",
   "colors": [
-    "silver"
+    {
+      "name": "silver",
+      "hex": "#c0c0c0"
+    }
   ],
+  "pattern": "solid",
+  "material": "",
+  "occasions": [],
+  "seasons": [],
+  "description": "",
+  "story": "",
+  "statement": 0.8,
+  "warmth": 2,
+  "formality": 4,
+  "gender_expression": "neutral",
   "style_tags": [
     "statement",
     "streetwear"
   ],
-  "formality": 4
+  "category": "jewelry",
+  "brand": "Nike",
+  "tier": "sportswear",
+  "name": "Statement Silver Chain",
+  "tagged_by": "legacy",
+  "pixel_colors": [
+    {
+      "name": "silver",
+      "hex": "#b4b4b4",
+      "share": 1.0
+    }
+  ]
 }

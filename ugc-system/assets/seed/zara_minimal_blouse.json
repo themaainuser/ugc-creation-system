@@ -1,14 +1,29 @@
 {
-  "category": "top",
-  "brands": [
-    "Zara"
-  ],
+  "subcategory": "",
   "colors": [
-    "white"
+    {
+      "name": "white",
+      "hex": "#f7f7f5"
+    }
   ],
+  "pattern": "solid",
+  "material": "",
+  "occasions": [],
+  "seasons": [],
+  "description": "",
+  "story": "",
+  "statement": 0.3,
+  "warmth": 2,
+  "formality": 6,
+  "gender_expression": "feminine",
   "style_tags": [
     "minimal",
     "formal"
   ],
-  "formality": 6
+  "category": "top",
+  "brand": "Zara",
+  "tier": "high_street",
+  "name": "Zara Minimal Blouse",
+  "tagged_by": "legacy",
+  "pixel_colors": []
 }

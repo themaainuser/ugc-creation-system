@@ -1,14 +1,35 @@
 {
-  "category": "top",
-  "brands": [
-    "Nike"
-  ],
+  "subcategory": "",
   "colors": [
-    "red"
+    {
+      "name": "red",
+      "hex": "#c8102e"
+    }
   ],
+  "pattern": "solid",
+  "material": "",
+  "occasions": [],
+  "seasons": [],
+  "description": "",
+  "story": "",
+  "statement": 0.3,
+  "warmth": 4,
+  "formality": 2,
+  "gender_expression": "neutral",
   "style_tags": [
     "streetwear",
     "athletic"
   ],
-  "formality": 2
+  "category": "top",
+  "brand": "Nike",
+  "tier": "sportswear",
+  "name": "Nike Streetwear Hoodie",
+  "tagged_by": "legacy",
+  "pixel_colors": [
+    {
+      "name": "red",
+      "hex": "#c82828",
+      "share": 1.0
+    }
+  ]
 }

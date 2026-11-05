@@ -1,15 +1,36 @@
 {
-  "category": "full-fit",
-  "brands": [
-    "Skims"
-  ],
+  "subcategory": "",
   "colors": [
-    "taupe"
+    {
+      "name": "taupe",
+      "hex": "#888888"
+    }
   ],
+  "pattern": "solid",
+  "material": "",
+  "occasions": [],
+  "seasons": [],
+  "description": "",
+  "story": "",
+  "statement": 0.3,
+  "warmth": 2,
+  "formality": 2,
+  "gender_expression": "neutral",
   "style_tags": [
     "cozy",
     "casual",
     "minimal"
   ],
-  "formality": 2
+  "category": "dress",
+  "brand": "Skims",
+  "tier": "premium",
+  "name": "Skims Minimal Loungeset",
+  "tagged_by": "legacy",
+  "pixel_colors": [
+    {
+      "name": "tan",
+      "hex": "#beaa96",
+      "share": 1.0
+    }
+  ]
 }

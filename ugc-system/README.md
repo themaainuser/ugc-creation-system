@@ -3,6 +3,7 @@
 Two tools for running AI UGC influencer accounts:
 
 - **Reel Lab** (home page, `/`) — paste a reel, get its playbook. Described below.
+- **Daily Look** (`/looks`) + **Wardrobe** (`/wardrobe`) — outfit, pose and expression decisions that learn from you.
 - **Operator console** (`/console`) — the styling / expression / calibrated-decision line. Documented further down.
 
 ## Reel Lab
@@ -15,7 +16,7 @@ have. The lab then runs:
 |---|---|---|
 | 01 | Download | `yt-dlp` saves the reel into `data/jobs/<id>/media/` with its caption, creator and sound metadata |
 | 02 | Audio | `ffmpeg` splits a 16 kHz mono track and maps loudness + silent stretches (talking vs trending sound) |
-| 03 | Transcript | Whisper (local `faster-whisper`, or Groq / OpenAI) writes every line with timestamps |
+| 03 | Transcript | Whisper (local `faster-whisper`, or Groq / OpenAI) writes every line with timestamps. Uploads to Groq / OpenAI are re-encoded to 16 kHz mono Opus (~0.2 MB/min); past 24 MB they are split into ~10-minute chunks at silences with 1.5 s overlap, then merged with overlap duplicates removed |
 | 04 | Flipbook | keyframes: every 0.5s of the first 3s (the hook), every scene cut, even coverage, the last frame, plus edit stats |
 | 05 | Opus 5.5 | watches the flipbook in order, reads the transcript, your context, idea, persona and assets, and writes the outputs below |
 
@@ -66,6 +67,38 @@ python -m ugc_system.reel_lab health                           # what's installe
 ```
 
 Code: `ugc_system/reel_lab/` (`media.py`, `transcribe.py`, `flipbook.py`, `mastermind.py` — the Opus prompt lives here — and `pipeline.py`). UI: `ui/components/lab/`, API: `ui/app/api/reel/`.
+
+## Daily Look (outfit, poses, expressions)
+
+Open **Daily Look** (`/looks`), pick a persona, and describe the moment: day and time, place
+(free text: "nearby KFC", "Goa beach", "ramp walk at a fashion show"), environment and props,
+mood, what they're listening to, what's happening ("my niece made pasta for me, it's too salty",
+"wearing the shell necklace my niece made"), and an optional sponsor brand. You get:
+
+1. **Scene, as understood**: formality band, ground, weather and season (by persona `region`), jewelry level, allowed footwear, lighting, contexts (family, kindness, comedy, editorial, brand-trust...).
+2. **Outfit**: hard rules first (no heels on sand, weather, formality, gender expression, pieces worn this week rest). Then whole outfits are scored on colour harmony (from the real pixel colours), style coherence, one hero piece, persona fit, freshness, gift/thrift story and sponsor fit. You see five alternatives, each with **P(best)** and predicted approval, plus the reasons. Items you name in the notes are locked in.
+3. **Expression direction**: mood + music + place give a target point on an emotion map (happy↔sad, calm↔hyped). Genuine expressions are always allowed; performed ones only where they belong: comedy (deadpan, side-eye), kindness (the encouraging smile for a child's too-salty first dish), editorial (runway stare). Nothing performed is allowed near a sponsor.
+4. **Shots**: poses that fit the place and its props and show off the hero piece, picked for variety. Each shot has an expression, an image prompt, a video prompt, a negative prompt and the reference images (character + garments).
+5. **Feedback**: Approve (marks everything worn), Reject, or swap to an alternative. Each persona's learner (linear Thompson sampling, the open-source stand-in for a hosted calibrated-decision model like JEV) updates from every call and reports its calibration (Brier score).
+
+Optional **Opus art director** (≈$0.05–0.15): Opus looks at the shortlisted garments, makes the final pick and writes the caption.
+
+**Wardrobe** (`/wardrobe`): drop images (a folder hint like `gucci` or `handmade` helps), then **Tag with Opus** (≈$0.01 per item). Opus writes category, brand, tier, colours, formality, warmth, style, and a precise description that image models can reproduce. Sidecars live next to the images in `ugc-system/wardrobe/` and can be edited by hand.
+
+Persona YAML fields the stylist uses: `gender`, `brand_tier` (brands or tiers like `thrift`), `aesthetic`, `jewelry_style`, and optionally `appearance` (the look description used in every prompt), `reference_image`, `region` (`india`, `india-north`, `southern`...) and `wardrobe_expression: fluid`.
+
+Everything the stylist knows is editable YAML in `config/styling/`: `expressions.yaml` (33), `poses.yaml` (40), `scenes.yaml` (places, situations, moods, music).
+
+```bash
+python -m ugc_system.styling scan                      # index wardrobe/, extract colours
+python -m ugc_system.styling tag                       # Opus tags untagged items
+python -m ugc_system.styling plan --persona aria --place "home" --environment "bedroom, big mirror" \
+    --mood "cozy nostalgic" --music lofi --notes "wearing the shell necklace my niece made" --shots 3 [--opus]
+python -m ugc_system.styling feedback <look-id> approve      # or reject | swap --alt 2
+python -m ugc_system.styling learning --persona aria         # learned weights + calibration
+```
+
+Code: `ugc_system/styling/` (`scene.py`, `wardrobe.py`, `outfit.py`, `direction.py`, `learning.py`, `planner.py`). UI: `ui/components/looks/`.
 
 ---
 

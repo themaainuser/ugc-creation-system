@@ -1,14 +1,35 @@
 {
-  "category": "bottom",
-  "brands": [
-    "Hermes"
-  ],
+  "subcategory": "",
   "colors": [
-    "navy"
+    {
+      "name": "navy",
+      "hex": "#1f2a44"
+    }
   ],
+  "pattern": "solid",
+  "material": "",
+  "occasions": [],
+  "seasons": [],
+  "description": "",
+  "story": "",
+  "statement": 0.3,
+  "warmth": 2,
+  "formality": 8,
+  "gender_expression": "neutral",
   "style_tags": [
     "formal",
     "minimal"
   ],
-  "formality": 8
+  "category": "bottom",
+  "brand": "Hermes",
+  "tier": "luxury",
+  "name": "Hermes Formal Trousers",
+  "tagged_by": "legacy",
+  "pixel_colors": [
+    {
+      "name": "navy",
+      "hex": "#0a0a3c",
+      "share": 1.0
+    }
+  ]
 }

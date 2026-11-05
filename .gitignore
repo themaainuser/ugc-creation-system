@@ -22,3 +22,6 @@ ugc-system/data/decisions/
 # reel lab jobs (downloaded media, frames, outputs)
 ugc-system/data/jobs/
 ugc-system/ui/tsconfig.tsbuildinfo
+ugc-system/data/looks/
+ugc-system/data/learning/
+ugc-system/data/styling/

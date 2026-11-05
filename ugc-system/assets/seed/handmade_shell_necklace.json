@@ -1,15 +1,36 @@
 {
-  "category": "jewelry",
-  "brands": [
-    "handmade"
-  ],
+  "subcategory": "",
   "colors": [
-    "white"
+    {
+      "name": "white",
+      "hex": "#f7f7f5"
+    }
   ],
+  "pattern": "solid",
+  "material": "",
+  "occasions": [],
+  "seasons": [],
+  "description": "",
+  "story": "handmade piece — add who made it in the sidecar",
+  "statement": 0.3,
+  "warmth": 2,
+  "formality": 3,
+  "gender_expression": "neutral",
   "style_tags": [
     "thrift",
     "handmade",
     "gift"
   ],
-  "formality": 3
+  "category": "jewelry",
+  "brand": "handmade",
+  "tier": "handmade",
+  "name": "Handmade Shell Necklace",
+  "tagged_by": "legacy",
+  "pixel_colors": [
+    {
+      "name": "white",
+      "hex": "#f0f0e6",
+      "share": 1.0
+    }
+  ]
 }

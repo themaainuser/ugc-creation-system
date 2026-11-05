@@ -146,7 +146,7 @@ Platform metadata (caption, creator, counts, sound): {json.dumps(platform_meta, 
 Video: {probe.get('duration')}s, {probe.get('width')}x{probe.get('height')}, {probe.get('fps')} fps
 Edit stats: {json.dumps(fb.get('stats') or {})}
 Scene cuts at (s): {fb.get('scene_cuts') or []}
-Audio profile: {json.dumps(info.get('audio') or {})}
+Audio profile: {json.dumps({k: v for k, v in (info.get('audio') or {}).items() if k != 'cut_points'})}
 
 ## Transcript ({tr.get('provider', 'n/a')}, language: {tr.get('language') or 'n/a'})
 {timed}
