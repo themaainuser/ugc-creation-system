@@ -1,5 +1,5 @@
-import OperatorConsole from "../components/OperatorConsole";
+import ReelLab from "../components/lab/ReelLab";
 
 export default function Page() {
-  return <OperatorConsole />;
+  return <ReelLab />;
 }

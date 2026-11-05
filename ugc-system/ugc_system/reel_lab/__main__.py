@@ -21,6 +21,44 @@ def _job_path(ref: str) -> Path:
     return p if p.exists() else JOBS_DIR / ref
 
 
+def health() -> dict:
+    import importlib.util as iu
+    import os
+    from ..core.env import load_env
+    from . import mastermind, transcribe
+    load_env()
+    try:
+        mm = mastermind.pick_provider()
+    except mastermind.MastermindError:
+        mm = None
+    return {
+        "ffmpeg": bool(shutil.which("ffmpeg") and shutil.which("ffprobe")),
+        "ytdlp": iu.find_spec("yt_dlp") is not None,
+        "transcriber": transcribe.pick_provider(),
+        "mastermind": mm,
+        "mastermind_model": os.environ.get("UGC_MASTERMIND_MODEL") or (
+            "claude-opus-5-5" if mm == "anthropic" else "anthropic/claude-opus-5.5"),
+        "sdk": {"anthropic": iu.find_spec("anthropic") is not None,
+                "openai": iu.find_spec("openai") is not None},
+        "dry_run": os.environ.get("UGC_MASTERMIND_DRY_RUN") == "1",
+        "personas": _personas(),
+    }
+
+
+def _personas() -> list[dict]:
+    import yaml
+    from ..core.env import ROOT
+    out = []
+    for f in sorted((ROOT / "personas").glob("*.yaml")):
+        try:
+            d = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
+        except yaml.YAMLError:
+            continue
+        out.append({k: d.get(k) for k in ("id", "name", "gender", "niche", "aesthetic", "voice_tone")}
+                   | {"id": d.get("id") or f.stem})
+    return out
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="reel_lab")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -40,7 +78,12 @@ def main(argv=None) -> int:
     r.add_argument("job")
     r.add_argument("--redo", default="", help="comma list of stages to force")
     sub.add_parser("list")
+    sub.add_parser("health", help="which tools / keys are ready (JSON)")
     a = ap.parse_args(argv)
+
+    if a.cmd == "health":
+        print(json.dumps(health()))
+        return 0
 
     if a.cmd == "list":
         for d in sorted(JOBS_DIR.glob("*/job.json"), reverse=True)[:30]:

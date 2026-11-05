@@ -1,11 +1,19 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Instrument_Serif, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 const sans = Inter({
   weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
+});
+
+const serif = Instrument_Serif({
+  weight: ["400"],
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  variable: "--font-serif",
   display: "swap",
 });
 
@@ -17,9 +25,9 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "UGC Factory — Operator Console",
+  title: "UGC Studio — Reel Lab",
   description:
-    "Operator console for AI UGC production: intake, reel analysis with calibrated JEV decisions, styling, expressions, and dispatch.",
+    "Drop a reel, get its playbook: download, transcript, flipbook and Opus 5.5 generation prompts for your AI influencer.",
 };
 
 export default function RootLayout({
@@ -28,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
+    <html lang="en" className={`${sans.variable} ${serif.variable} ${mono.variable}`}>
       <body>{children}</body>
     </html>
   );
