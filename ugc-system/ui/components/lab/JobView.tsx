@@ -5,6 +5,7 @@ import Flipbook from "./Flipbook";
 import { fileUrl, fmtT, type JobView as JV, type Persona } from "./types";
 
 const ORDER = ["download", "audio", "transcribe", "flipbook", "mastermind"];
+const SHORT: Record<string, string> = { download: "Download", audio: "Audio", transcribe: "Transcript", flipbook: "Flipbook", mastermind: "Opus 5.5" };
 type Tab = "flow" | "prompts" | "flipbook" | "transcript" | "inputs";
 
 function elapsed(a?: number, b?: number) {
@@ -107,7 +108,7 @@ export default function JobView({
             <li key={k} className={`rl-stage ${state}`} aria-label={`${s?.label ?? k}: ${state}`}>
               <div className="top">
                 <span className="idx">0{n + 1}</span>
-                <b>{s?.label ?? k}</b>
+                <b>{SHORT[k]}</b>
                 <span className="st">{state === "running" ? elapsed(s?.started_at) || "live" : state === "done" ? `✓ ${elapsed(s?.started_at, s?.finished_at)}` : state}</span>
               </div>
               <p>{s?.message || (state === "pending" ? "waiting" : "")}</p>

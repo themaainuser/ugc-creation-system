@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, Inter, JetBrains_Mono } from "next/font/google";
-import "./globals.css";
 
 const sans = Inter({
   weight: ["400", "500", "600", "700"],

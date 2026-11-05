@@ -55,8 +55,8 @@ export default function Flipbook({ jobId, fb, video, duration }: { jobId: string
           ) : (
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={fileUrl(jobId, cur.file)} alt={`Frame at ${cur.t.toFixed(2)}s`} />
-              <div className="stamp">
+              <img src={fileUrl(jobId, `flipbook/${cur.file}`)} alt={`Frame at ${cur.t.toFixed(2)}s`} />
+              <div className="rl-stamp">
                 <span className="mono">{fmtT(cur.t)}</span>
                 {cur.cut && <span className="mono cut">CUT</span>}
                 {cur.kind === "hook" && <span className="mono">HOOK</span>}
@@ -103,7 +103,7 @@ export default function Flipbook({ jobId, fb, video, duration }: { jobId: string
                   return (
                     <button key={f.n} type="button" className="rl-frame" aria-current={idx === i} onClick={() => { setMode("flip"); setPlaying(false); setI(idx); }} aria-label={`Frame at ${f.t.toFixed(2)} seconds`}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={fileUrl(jobId, f.file)} alt="" loading="lazy" />
+                      <img src={fileUrl(jobId, `flipbook/${f.file}`)} alt="" loading="lazy" />
                       <span className="ts">{f.t.toFixed(1)}s</span>
                       {badge && <span className={`k ${badge}`}>{f.cut ? "CUT" : KIND_LABEL[f.kind]}</span>}
                     </button>

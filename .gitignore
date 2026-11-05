@@ -21,3 +21,4 @@ ugc-system/data/decisions/
 !ugc-system/data/decisions/.gitkeep
 # reel lab jobs (downloaded media, frames, outputs)
 ugc-system/data/jobs/
+ugc-system/ui/tsconfig.tsbuildinfo
