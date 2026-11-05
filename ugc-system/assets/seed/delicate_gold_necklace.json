@@ -1,14 +1,35 @@
 {
-  "category": "jewelry",
-  "brands": [
-    "Hermes"
-  ],
+  "subcategory": "",
   "colors": [
-    "gold"
+    {
+      "name": "gold",
+      "hex": "#d4af37"
+    }
   ],
+  "pattern": "solid",
+  "material": "",
+  "occasions": [],
+  "seasons": [],
+  "description": "",
+  "story": "",
+  "statement": 0.3,
+  "warmth": 2,
+  "formality": 6,
+  "gender_expression": "neutral",
   "style_tags": [
     "minimal",
     "formal"
   ],
-  "formality": 6
+  "category": "jewelry",
+  "brand": "Hermes",
+  "tier": "luxury",
+  "name": "Delicate Gold Necklace",
+  "tagged_by": "legacy",
+  "pixel_colors": [
+    {
+      "name": "gold",
+      "hex": "#dcb43c",
+      "share": 1.0
+    }
+  ]
 }

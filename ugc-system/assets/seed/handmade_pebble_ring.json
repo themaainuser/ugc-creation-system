@@ -1,15 +1,36 @@
 {
-  "category": "jewelry",
-  "brands": [
-    "handmade"
-  ],
+  "subcategory": "",
   "colors": [
-    "grey"
+    {
+      "name": "grey",
+      "hex": "#8e8e8e"
+    }
   ],
+  "pattern": "solid",
+  "material": "",
+  "occasions": [],
+  "seasons": [],
+  "description": "",
+  "story": "handmade piece — add who made it in the sidecar",
+  "statement": 0.3,
+  "warmth": 2,
+  "formality": 2,
+  "gender_expression": "neutral",
   "style_tags": [
     "handmade",
     "gift",
     "thrift"
   ],
-  "formality": 2
+  "category": "jewelry",
+  "brand": "handmade",
+  "tier": "handmade",
+  "name": "Handmade Pebble Ring",
+  "tagged_by": "legacy",
+  "pixel_colors": [
+    {
+      "name": "grey",
+      "hex": "#969696",
+      "share": 1.0
+    }
+  ]
 }

@@ -1,15 +1,36 @@
 {
-  "category": "top",
-  "brands": [
-    "Skims"
-  ],
+  "subcategory": "",
   "colors": [
-    "beige"
+    {
+      "name": "beige",
+      "hex": "#d9c7a7"
+    }
   ],
+  "pattern": "solid",
+  "material": "",
+  "occasions": [],
+  "seasons": [],
+  "description": "",
+  "story": "",
+  "statement": 0.3,
+  "warmth": 2,
+  "formality": 3,
+  "gender_expression": "neutral",
   "style_tags": [
     "cozy",
     "casual",
     "minimal"
   ],
-  "formality": 3
+  "category": "top",
+  "brand": "Skims",
+  "tier": "premium",
+  "name": "Skims Cozy Tee",
+  "tagged_by": "legacy",
+  "pixel_colors": [
+    {
+      "name": "cream",
+      "hex": "#f0e6d2",
+      "share": 1.0
+    }
+  ]
 }

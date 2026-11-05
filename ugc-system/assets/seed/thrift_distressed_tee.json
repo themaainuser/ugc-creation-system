@@ -1,15 +1,36 @@
 {
-  "category": "top",
-  "brands": [
-    "thrift"
-  ],
+  "subcategory": "",
   "colors": [
-    "washed"
+    {
+      "name": "washed",
+      "hex": "#888888"
+    }
   ],
+  "pattern": "solid",
+  "material": "",
+  "occasions": [],
+  "seasons": [],
+  "description": "",
+  "story": "",
+  "statement": 0.3,
+  "warmth": 2,
+  "formality": 2,
+  "gender_expression": "neutral",
   "style_tags": [
     "thrift",
     "casual",
     "streetwear"
   ],
-  "formality": 2
+  "category": "top",
+  "brand": "thrift",
+  "tier": "thrift",
+  "name": "Thrift Distressed Tee",
+  "tagged_by": "legacy",
+  "pixel_colors": [
+    {
+      "name": "olive",
+      "hex": "#786e64",
+      "share": 1.0
+    }
+  ]
 }

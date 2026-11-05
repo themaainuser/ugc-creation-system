@@ -1,14 +1,35 @@
 {
-  "category": "top",
-  "brands": [
-    "Prada"
-  ],
+  "subcategory": "",
   "colors": [
-    "black"
+    {
+      "name": "black",
+      "hex": "#111111"
+    }
   ],
+  "pattern": "solid",
+  "material": "",
+  "occasions": [],
+  "seasons": [],
+  "description": "",
+  "story": "",
+  "statement": 0.8,
+  "warmth": 2,
+  "formality": 8,
+  "gender_expression": "neutral",
   "style_tags": [
     "formal",
     "statement"
   ],
-  "formality": 8
+  "category": "top",
+  "brand": "Prada",
+  "tier": "luxury",
+  "name": "Prada Statement Blazer",
+  "tagged_by": "legacy",
+  "pixel_colors": [
+    {
+      "name": "black",
+      "hex": "#141414",
+      "share": 1.0
+    }
+  ]
 }

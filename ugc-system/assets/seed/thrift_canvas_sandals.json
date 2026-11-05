@@ -1,15 +1,36 @@
 {
-  "category": "footwear",
-  "brands": [
-    "thrift"
-  ],
+  "subcategory": "sandals",
   "colors": [
-    "tan"
+    {
+      "name": "tan",
+      "hex": "#d2b48c"
+    }
   ],
+  "pattern": "solid",
+  "material": "",
+  "occasions": [],
+  "seasons": [],
+  "description": "",
+  "story": "",
+  "statement": 0.3,
+  "warmth": 2,
+  "formality": 2,
+  "gender_expression": "neutral",
   "style_tags": [
     "resort",
     "casual",
     "thrift"
   ],
-  "formality": 2
+  "category": "footwear",
+  "brand": "thrift",
+  "tier": "thrift",
+  "name": "Thrift Canvas Sandals",
+  "tagged_by": "legacy",
+  "pixel_colors": [
+    {
+      "name": "camel",
+      "hex": "#d2aa6e",
+      "share": 1.0
+    }
+  ]
 }

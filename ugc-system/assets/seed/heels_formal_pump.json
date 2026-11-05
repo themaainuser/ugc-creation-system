@@ -1,14 +1,35 @@
 {
-  "category": "footwear",
-  "brands": [
-    "Prada"
-  ],
+  "subcategory": "heels",
   "colors": [
-    "nude"
+    {
+      "name": "nude",
+      "hex": "#888888"
+    }
   ],
+  "pattern": "solid",
+  "material": "",
+  "occasions": [],
+  "seasons": [],
+  "description": "",
+  "story": "",
+  "statement": 0.3,
+  "warmth": 2,
+  "formality": 7,
+  "gender_expression": "feminine",
   "style_tags": [
     "formal",
     "minimal"
   ],
-  "formality": 7
+  "category": "footwear",
+  "brand": "Prada",
+  "tier": "luxury",
+  "name": "Heels Formal Pump",
+  "tagged_by": "legacy",
+  "pixel_colors": [
+    {
+      "name": "beige",
+      "hex": "#dcbeaa",
+      "share": 1.0
+    }
+  ]
 }

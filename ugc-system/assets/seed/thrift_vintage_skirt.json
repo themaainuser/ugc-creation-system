@@ -1,14 +1,35 @@
 {
-  "category": "bottom",
-  "brands": [
-    "thrift"
-  ],
+  "subcategory": "",
   "colors": [
-    "floral"
+    {
+      "name": "floral",
+      "hex": "#888888"
+    }
   ],
+  "pattern": "solid",
+  "material": "",
+  "occasions": [],
+  "seasons": [],
+  "description": "",
+  "story": "",
+  "statement": 0.3,
+  "warmth": 2,
+  "formality": 4,
+  "gender_expression": "feminine",
   "style_tags": [
     "thrift",
     "casual"
   ],
-  "formality": 4
+  "category": "bottom",
+  "brand": "thrift",
+  "tier": "thrift",
+  "name": "Thrift Vintage Skirt",
+  "tagged_by": "legacy",
+  "pixel_colors": [
+    {
+      "name": "grey",
+      "hex": "#b48ca0",
+      "share": 1.0
+    }
+  ]
 }

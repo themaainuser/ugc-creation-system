@@ -1,14 +1,35 @@
 {
-  "category": "top",
-  "brands": [
-    "Gucci"
-  ],
+  "subcategory": "",
   "colors": [
-    "green"
+    {
+      "name": "green",
+      "hex": "#2e8b57"
+    }
   ],
+  "pattern": "solid",
+  "material": "",
+  "occasions": [],
+  "seasons": [],
+  "description": "",
+  "story": "",
+  "statement": 0.8,
+  "warmth": 2,
+  "formality": 7,
+  "gender_expression": "neutral",
   "style_tags": [
     "statement",
     "formal"
   ],
-  "formality": 7
+  "category": "top",
+  "brand": "Gucci",
+  "tier": "luxury",
+  "name": "Gucci Statement Top",
+  "tagged_by": "legacy",
+  "pixel_colors": [
+    {
+      "name": "charcoal",
+      "hex": "#1e5028",
+      "share": 1.0
+    }
+  ]
 }
