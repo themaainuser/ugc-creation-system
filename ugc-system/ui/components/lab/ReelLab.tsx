@@ -3,6 +3,7 @@ import "../../app/lab.css";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Composer, { emptyDraft, type Draft } from "./Composer";
 import JobView from "./JobView";
+import TopBar from "./TopBar";
 import type { Health, JobSummary, JobView as JV } from "./types";
 
 const STEPS = [
@@ -125,19 +126,12 @@ export default function ReelLab() {
 
   return (
     <div className="lab">
-      <header className="rl-top">
-        <a className="rl-brand" href="/"><b>UGC Studio</b><span>Reel Lab</span></a>
-        <nav className="rl-nav" aria-label="Sections">
-          <a href="/" aria-current="page">Reel Lab</a>
-          <a href="/console">Operator console</a>
-        </nav>
-        <div className="rl-health">
-          {health?.dry_run && <span className="rl-pill" title="UGC_MASTERMIND_DRY_RUN=1 — Opus is not called"><i />dry run</span>}
-          {pills.map(([label, ok, title]) => (
-            <span key={label} className={`rl-pill ${ok ? "ok" : "bad"}`} title={title}><i />{label}</span>
-          ))}
-        </div>
-      </header>
+      <TopBar active="lab">
+        {health?.dry_run && <span className="rl-pill" title="UGC_MASTERMIND_DRY_RUN=1 — Opus is not called"><i />dry run</span>}
+        {pills.map(([label, ok, title]) => (
+          <span key={label} className={`rl-pill ${ok ? "ok" : "bad"}`} title={title}><i />{label}</span>
+        ))}
+      </TopBar>
 
       <div className="rl-shell">
         <aside className="rl-side">
