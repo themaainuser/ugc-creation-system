@@ -19,3 +19,5 @@ Thumbs.db
 ugc-system/data/briefs/*.json
 ugc-system/data/decisions/
 !ugc-system/data/decisions/.gitkeep
+# reel lab jobs (downloaded media, frames, outputs)
+ugc-system/data/jobs/
