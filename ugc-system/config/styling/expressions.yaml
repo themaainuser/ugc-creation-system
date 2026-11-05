@@ -5,30 +5,31 @@
 #             music and place, then picks the nearest allowed expressions.
 #   allow     performed expressions are ONLY allowed when the scene has one of these contexts
 #   banned_in contexts where this expression must never be used
+#   suits     (optional) contexts a genuine expression belongs to; elsewhere it scores lower
 #   face      what an image/video model must render (be precise: eyes, brows, mouth)
 #   motion    how it plays across a 2-4s video clip
 - {id: duchenne_smile, name: Real smile, mode: genuine, v: 0.8, a: 0.3, face: "genuine Duchenne smile — cheeks lifted, crow's-feet creases at the outer eyes, lower eyelids pushed up, teeth showing", motion: "smile builds from the eyes first, then the mouth, holds warmly"}
 - {id: duchenne_laugh, name: Laughing, mode: genuine, v: 0.85, a: 0.75, face: "mid-laugh — head tipped back slightly, eyes squeezed into crescents, mouth open, shoulders lifted", motion: "breaks into laughter, glances away, looks back still laughing"}
 - {id: soft_smile, name: Soft smile, mode: genuine, v: 0.55, a: -0.2, face: "closed-lip smile that reaches the eyes, relaxed brow, soft gaze", motion: "slow blink into a gentle smile"}
 - {id: shy_smile, name: Shy smile, mode: genuine, v: 0.45, a: 0.1, face: "smile while glancing down and away, chin slightly tucked, faint blush", motion: "looks at lens, smiles, drops gaze"}
-- {id: proud_beam, name: Proud beam, mode: genuine, v: 0.8, a: 0.45, face: "broad open smile, chest lifted, bright eyes, slight nod", motion: "nods while beaming"}
+- {id: proud_beam, name: Proud beam, mode: genuine, v: 0.8, a: 0.45, face: "broad open smile, chest lifted, bright eyes, slight nod", motion: "nods while beaming", suits: [festive, family, work, fitness]}
 - {id: excited_burst, name: Excited burst, mode: genuine, v: 0.75, a: 0.9, face: "eyes wide, eyebrows raised, open-mouth grin, hands near the face", motion: "small jump or bounce, hands fly up"}
 - {id: delighted_surprise, name: Delighted surprise, mode: genuine, v: 0.7, a: 0.8, face: "brows raised, eyes widened, mouth opens into an O that turns into a smile", motion: "freeze for a beat, then grin"}
-- {id: awe, name: Awe, mode: genuine, v: 0.6, a: 0.55, face: "eyes wide and glistening, lips slightly parted, face lit, body still", motion: "slow look up and around, breath held"}
+- {id: awe, name: Awe, mode: genuine, v: 0.6, a: 0.55, face: "eyes wide and glistening, lips slightly parted, face lit, body still", motion: "slow look up and around, breath held", suits: [travel, festive, editorial]}
 - {id: mischievous_grin, name: Mischievous grin, mode: genuine, v: 0.6, a: 0.55, face: "one-sided grin, narrowed eyes, one brow raised", motion: "glance to the side, back to lens with the grin"}
 - {id: confident_smirk, name: Confident smirk, mode: genuine, v: 0.45, a: 0.3, face: "asymmetric closed-mouth smirk, steady eye contact, chin slightly down", motion: "holds eye contact, smirk grows on one side"}
 - {id: calm_content, name: Calm content, mode: genuine, v: 0.5, a: -0.5, face: "relaxed face, soft eyes, faint smile, loose jaw", motion: "slow breath out, settles"}
-- {id: dreamy_gaze, name: Dreamy gaze, mode: genuine, v: 0.45, a: -0.45, face: "unfocused gaze into the distance, lips slightly parted, soft brows", motion: "drifts from lens to the distance"}
-- {id: serene_eyes_closed, name: Serene, mode: genuine, v: 0.5, a: -0.7, face: "eyes gently closed, face tilted toward the light, relaxed half-smile", motion: "eyes close slowly, face turns into the sun"}
-- {id: loving_gaze, name: Loving gaze, mode: genuine, v: 0.7, a: -0.1, face: "warm eye contact, soft smile, slight head tilt, relaxed brows", motion: "looks up at someone off-camera and softens"}
-- {id: grateful_teary, name: Grateful, mode: genuine, v: 0.6, a: 0.05, face: "glassy eyes, trembling smile, hand on chest", motion: "presses hand to chest, blinks back tears, smiles"}
-- {id: nostalgic_smile, name: Nostalgic, mode: genuine, v: 0.35, a: -0.3, face: "wistful half-smile, eyes slightly lowered, softened brows", motion: "touches the object (necklace, photo), smiles to self"}
-- {id: focused_flow, name: Focused, mode: genuine, v: 0.15, a: 0.2, face: "brows slightly drawn together, eyes locked on the task, lips pressed", motion: "absorbed in the task, small satisfied nod at the end"}
+- {id: dreamy_gaze, name: Dreamy gaze, mode: genuine, v: 0.45, a: -0.45, face: "unfocused gaze into the distance, lips slightly parted, soft brows", motion: "drifts from lens to the distance", suits: [intimate, travel, romance]}
+- {id: serene_eyes_closed, name: Serene, mode: genuine, v: 0.5, a: -0.7, face: "eyes gently closed, face tilted toward the light, relaxed half-smile", motion: "eyes close slowly, face turns into the sun", suits: [travel, intimate, fitness]}
+- {id: loving_gaze, name: Loving gaze, mode: genuine, v: 0.7, a: -0.1, face: "warm eye contact, soft smile, slight head tilt, relaxed brows", motion: "looks up at someone off-camera and softens", suits: [romance, family, intimate]}
+- {id: grateful_teary, name: Grateful, mode: genuine, v: 0.6, a: 0.05, face: "glassy eyes, trembling smile, hand on chest", motion: "presses hand to chest, blinks back tears, smiles", suits: [family, festive, kindness, intimate]}
+- {id: nostalgic_smile, name: Nostalgic, mode: genuine, v: 0.35, a: -0.3, face: "wistful half-smile, eyes slightly lowered, softened brows", motion: "touches the object (necklace, photo), smiles to self", suits: [family, intimate, travel]}
+- {id: focused_flow, name: Focused, mode: genuine, v: 0.15, a: 0.2, face: "brows slightly drawn together, eyes locked on the task, lips pressed", motion: "absorbed in the task, small satisfied nod at the end", suits: [work, fitness, food, editorial]}
 - {id: curious_tilt, name: Curious, mode: genuine, v: 0.3, a: 0.25, face: "head tilted, one brow raised, lips slightly parted", motion: "leans in, tilts head"}
-- {id: tired_exhale, name: Tired, mode: genuine, v: -0.2, a: -0.75, face: "heavy-lidded eyes, cheeks puffed mid-exhale, shoulders slumped", motion: "long exhale, drops onto the bed/sofa"}
-- {id: melancholic_gaze, name: Melancholic, mode: genuine, v: -0.55, a: -0.4, face: "downcast eyes, flat mouth, brows pinched slightly inward", motion: "looks out of a window, barely moves"}
-- {id: genuine_disgust, name: Disgust, mode: genuine, v: -0.6, a: 0.4, face: "nose wrinkled, upper lip raised, eyes squinting", motion: "pulls back from the thing, swallows hard", banned_in: [kindness]}
-- {id: embarrassed_cringe, name: Cringe, mode: genuine, v: -0.3, a: 0.45, face: "teeth-clenched grimace, eyes squeezed, shoulders up to ears", motion: "covers face with hands, peeks through fingers"}
+- {id: tired_exhale, name: Tired, mode: genuine, v: -0.2, a: -0.75, face: "heavy-lidded eyes, cheeks puffed mid-exhale, shoulders slumped", motion: "long exhale, drops onto the bed/sofa", suits: [intimate, fitness, work, comedy]}
+- {id: melancholic_gaze, name: Melancholic, mode: genuine, v: -0.55, a: -0.4, face: "downcast eyes, flat mouth, brows pinched slightly inward", motion: "looks out of a window, barely moves", suits: [intimate]}
+- {id: genuine_disgust, name: Disgust, mode: genuine, v: -0.6, a: 0.4, face: "nose wrinkled, upper lip raised, eyes squinting", motion: "pulls back from the thing, swallows hard", banned_in: [kindness], suits: [food, comedy]}
+- {id: embarrassed_cringe, name: Cringe, mode: genuine, v: -0.3, a: 0.45, face: "teeth-clenched grimace, eyes squeezed, shoulders up to ears", motion: "covers face with hands, peeks through fingers", suits: [comedy, intimate, food]}
 - {id: polite_smile, name: Polite smile, mode: performed, v: 0.3, a: 0.0, face: "social smile — mouth only, eyes NOT crinkled, steady gaze", motion: "smile switches on, holds a little too long", allow: [kindness, work, event], banned_in: [brand_trust]}
 - {id: encouraging_smile, name: Encouraging smile, mode: performed, v: 0.5, a: 0.2, face: "big warm smile and enthusiastic nod while chewing, eyes very slightly strained at the corners", motion: "chews, pauses half a beat, then nods with a thumbs up", allow: [kindness], banned_in: [brand_trust, review]}
 - {id: brave_face, name: Brave face, mode: performed, v: 0.1, a: -0.1, face: "steady small smile masking sadness, eyes slightly glassy", motion: "smile holds while the eyes give it away", allow: [kindness, family], banned_in: [brand_trust, comedy]}
@@ -38,5 +39,5 @@
 - {id: mock_horror, name: Mock horror, mode: performed, v: -0.4, a: 0.8, face: "jaw drop, hands on cheeks, eyes huge", motion: "snap zoom-ready jaw drop", allow: [comedy], banned_in: [brand_trust]}
 - {id: eye_roll, name: Eye roll, mode: performed, v: -0.3, a: 0.3, face: "exaggerated eye roll, lips pressed, head tilting back", motion: "full eye roll with a sigh", allow: [comedy], banned_in: [brand_trust, family]}
 - {id: editorial_stare, name: Editorial stare, mode: performed, v: 0.0, a: 0.1, face: "neutral mouth, intense eye contact, relaxed jaw, chin slightly down — fierce but still", motion: "stares through the lens, turns the head a quarter on the beat", allow: [editorial]}
-- {id: flirty_glance, name: Flirty glance, mode: performed, v: 0.55, a: 0.35, face: "over-the-shoulder look, half-lidded eyes, hint of a smile", motion: "looks back over the shoulder and holds", allow: [romance, nightlife, editorial], banned_in: [family, kindness, work]}
+- {id: flirty_glance, name: Flirty glance, mode: performed, v: 0.55, a: 0.35, face: "over-the-shoulder look, half-lidded eyes, hint of a smile", motion: "looks back over the shoulder and holds", allow: [romance, nightlife, editorial], banned_in: [family, kindness, work, brand_trust]}
 - {id: pout, name: Pout, mode: performed, v: 0.1, a: 0.2, face: "lips pushed forward in a pout, eyes up at the lens", motion: "pout into a wink", allow: [comedy, nightlife], banned_in: [brand_trust, work]}

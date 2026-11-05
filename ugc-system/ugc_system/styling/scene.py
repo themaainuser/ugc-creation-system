@@ -20,7 +20,7 @@ from ..core.env import ROOT
 
 CFG = ROOT / "config" / "styling"
 CACHE = ROOT / "data" / "styling" / "scene_cache.json"
-LIST_KEYS = ("settings", "footwear", "props", "contexts")
+LIST_KEYS = ("settings", "footwear", "props", "contexts", "faces")
 
 
 @lru_cache(maxsize=1)
@@ -54,6 +54,7 @@ class Scene:
     contexts: list = field(default_factory=list)
     target_va: list = field(default_factory=lambda: [0.3, 0.0])
     va_parts: dict = field(default_factory=dict)
+    preferred_faces: list = field(default_factory=list)
     situation_notes: list = field(default_factory=list)
     matched: list = field(default_factory=list)
     source: str = "rules"
@@ -209,6 +210,7 @@ def interpret(inp: dict, persona: dict | None = None) -> Scene:
         sc.footwear = [f for f in sc.footwear if f in terrain_shoes[sc.terrain]] or terrain_shoes[sc.terrain]
     sc.jewelry = base.get("jewelry", "everyday")
     sc.contexts = list(base.get("contexts") or [])
+    sc.preferred_faces = list(base.get("faces") or [])
     # props named in the environment text ("a big mirror", "stairs") count too
     props = set(base.get("props") or [])
     for p in ("mirror", "stairs", "chair", "table", "window", "car", "railing", "bed", "counter", "escalator", "pool", "wall"):
