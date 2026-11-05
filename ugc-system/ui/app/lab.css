@@ -432,6 +432,7 @@ body { font-family: var(--font-sans), Inter, system-ui, -apple-system, "Segoe UI
 .lk-feedback { position: sticky; bottom: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 14px; margin-top: 10px; border: 1px solid var(--line-2); border-radius: 14px; background: rgba(17, 17, 19, 0.92); backdrop-filter: blur(10px); }
 .lk-feedback .msg { color: var(--text-2); font-size: 12.5px; margin-right: auto; }
 .lk-feedback .done { color: var(--accent); }
+@media (max-width: 700px) { .lk-feedback { position: static; } }
 
 .lk-ad { border: 1px solid rgba(198, 244, 50, 0.25); background: linear-gradient(180deg, rgba(198, 244, 50, 0.05), transparent), var(--panel); border-radius: var(--r); padding: 16px 18px; }
 .lk-ad p { margin: 0 0 10px; color: var(--text-2); }

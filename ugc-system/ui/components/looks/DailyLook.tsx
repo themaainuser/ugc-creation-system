@@ -342,7 +342,9 @@ export default function DailyLook() {
               </section>
 
               <div className="lk-feedback" role="region" aria-label="Feedback">
-                {done ? (
+                {busy && look ? (
+                  <span className="msg" style={{ display: "flex", gap: 8, alignItems: "center" }}><span className="rl-spin" />{busy}</span>
+                ) : done ? (
                   <span className="msg done">{fbMsg ?? `You marked this look: ${look.feedback!.verdict}.`}</span>
                 ) : (
                   <>

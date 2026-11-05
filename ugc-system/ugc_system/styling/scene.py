@@ -182,8 +182,8 @@ def interpret(inp: dict, persona: dict | None = None) -> Scene:
     where = f"{sc.place} {sc.environment}"
     merged: dict = {}
     for rule in rules()["places"]:
-        if re.search(rule["match"], where, re.I):
-            sc.matched.append(rule["match"].split("|")[0].strip("\\b"))
+        if hit := re.search(rule["match"], where, re.I):
+            sc.matched.append(hit.group(0).strip().lower())
             for k, v in rule.items():
                 if k == "match":
                     continue
@@ -213,7 +213,7 @@ def interpret(inp: dict, persona: dict | None = None) -> Scene:
     sc.preferred_faces = list(base.get("faces") or [])
     # props named in the environment text ("a big mirror", "stairs") count too
     props = set(base.get("props") or [])
-    for p in ("mirror", "stairs", "chair", "table", "window", "car", "railing", "bed", "counter", "escalator", "pool", "wall"):
+    for p in ("mirror", "stairs", "chair", "table", "window", "car", "railing", "bed", "counter", "escalator", "pool", "wall", "mat"):
         if re.search(rf"\b{p}", sc.environment, re.I):
             props.add(p)
     sc.props = sorted(props)
