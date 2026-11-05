@@ -10,7 +10,7 @@ Commands:
   line {...}          → {analysis, decision, brief}
   save-brief {brief}  → writes data/briefs/{persona}_{date}.json + cooldown log
   health              → {"ok":true,"jev":bool,"llm":bool,"models":{...},"assets":n,"personas":n}
-  outcome {...}       → log Brier-scored outcome, returns {"brier":x}
+  outcome {...}       → log Brier-scored outcome, returns {"brier":x,"record":{...}}
 """
 from __future__ import annotations
 import json, re, sys
