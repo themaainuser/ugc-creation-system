@@ -1,5 +1,13 @@
 # Core
 PyYAML>=6.0
+Pillow>=10.0
 
-# Optional — uncomment to enable real AI analysis + image understanding
-# openai>=1.40
+# Reel Lab: download -> audio -> transcript -> flipbook -> Opus mastermind
+# (also needs the ffmpeg binary on PATH)
+yt-dlp>=2025.1.1
+faster-whisper>=1.0      # local, free transcription (or set GROQ_API_KEY / OPENAI_API_KEY)
+anthropic>=0.70          # Opus 5.5 via ANTHROPIC_API_KEY
+openai>=1.40             # OpenRouter route (OPEN_ROUTER_API_KEY) + Groq/OpenAI whisper
+
+# Tests
+pytest>=8

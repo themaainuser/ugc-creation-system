@@ -1,4 +1,76 @@
-# UGC Factory — Operator Console
+# UGC Studio
+
+Two tools for running AI UGC influencer accounts:
+
+- **Reel Lab** (home page, `/`) — paste a reel, get its playbook. Described below.
+- **Operator console** (`/console`) — the styling / expression / calibrated-decision line. Documented further down.
+
+## Reel Lab
+
+Paste an Instagram / TikTok / Shorts link (or upload the video), pick a persona,
+say why the reel fits them and what your twist is, drop in any assets you already
+have. The lab then runs:
+
+| # | Stage | What happens |
+|---|---|---|
+| 01 | Download | `yt-dlp` saves the reel into `data/jobs/<id>/media/` with its caption, creator and sound metadata |
+| 02 | Audio | `ffmpeg` splits a 16 kHz mono track and maps loudness + silent stretches (talking vs trending sound) |
+| 03 | Transcript | Whisper (local `faster-whisper`, or Groq / OpenAI) writes every line with timestamps |
+| 04 | Flipbook | keyframes: every 0.5s of the first 3s (the hook), every scene cut, even coverage, the last frame, plus edit stats |
+| 05 | Opus 5.5 | watches the flipbook in order, reads the transcript, your context, idea, persona and assets, and writes the outputs below |
+
+Outputs, in `data/jobs/<id>/out/` and in the UI:
+
+- **`reel_flow.md`** — how the source reel flows: hook teardown (visual, text, verbal, audio), beat-by-beat timeline, graphics & text system, editing rhythm, audio design, performance, ending mechanic, keep-vs-change.
+- **`generation_prompts.md`** — your version: concept, reusable character block, asset list (your uploads by filename, or GENERATE with a prompt), timed script, shot list with image prompt + video prompt + negative prompt + camera + expression (genuine/performed) + overlays per shot, edit notes, an all-in-one prompt, caption and hashtags.
+- **`blueprint.json`** — the same shot list as structured data for automation.
+
+Modes: **Remix** keeps the essence and swaps in your idea (leave the idea blank and Opus pitches one); **Recreate** keeps the script and only swaps the creator for your persona.
+
+Every stage is cached. **Retry** resumes from the failed step, **Rewrite with Opus** re-runs only the last step, **Remix with a new idea** reuses the download, transcript and flipbook so only Opus runs again. A run costs roughly $0.40–1.50 of Opus usage (48 frames ≈ 30k input tokens, plus thinking and the two documents); the exact figure is shown on each job.
+
+### Setup
+
+```bash
+# 1. system tools
+brew install ffmpeg            # or: apt install ffmpeg / winget install ffmpeg
+
+# 2. python deps (from ugc-system/)
+pip install -r requirements.txt
+
+# 3. keys: copy the template and set ONE of these
+cp .env.example .env
+#   ANTHROPIC_API_KEY=sk-ant-...        (Anthropic API, model claude-opus-5-5)
+#   OPEN_ROUTER_API_KEY=sk-or-v1-...    (OpenRouter, model anthropic/claude-opus-5.5)
+# Instagram usually needs your login: UGC_COOKIES_FROM_BROWSER=chrome
+
+# 4. UI
+cd ui && npm install && npm run dev     # http://localhost:3000
+```
+
+The status pills in the top bar say what's missing (ffmpeg, yt-dlp, transcriber, Opus key).
+The first local transcription downloads the Whisper model (~460 MB for `small`).
+If Instagram refuses the download, upload the video file instead.
+
+### CLI (same pipeline, no UI)
+
+```bash
+python -m ugc_system.reel_lab new --url https://www.instagram.com/reel/XXXX/ \
+    --persona aria --mode remix \
+    --context "deadpan hook matches her dry humor" \
+    --idea "rate thrift finds against the luxury pieces they copy" \
+    --asset refs/aria_face.png:character:"Aria face ref" --run
+python -m ugc_system.reel_lab run <job-id> --redo mastermind   # rewrite the documents
+python -m ugc_system.reel_lab list
+python -m ugc_system.reel_lab health                           # what's installed / configured
+```
+
+Code: `ugc_system/reel_lab/` (`media.py`, `transcribe.py`, `flipbook.py`, `mastermind.py` — the Opus prompt lives here — and `pipeline.py`). UI: `ui/components/lab/`, API: `ui/app/api/reel/`.
+
+---
+
+# Operator console
+
 
 A control room for running AI UGC influencer accounts. Three Python engines
 (Reel Analyzer, Stylist, Expression) plus one orchestrator produce a
