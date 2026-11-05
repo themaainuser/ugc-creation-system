@@ -16,7 +16,7 @@ have. The lab then runs:
 |---|---|---|
 | 01 | Download | `yt-dlp` saves the reel into `data/jobs/<id>/media/` with its caption, creator and sound metadata |
 | 02 | Audio | `ffmpeg` splits a 16 kHz mono track and maps loudness + silent stretches (talking vs trending sound) |
-| 03 | Transcript | Whisper (local `faster-whisper`, or Groq / OpenAI) writes every line with timestamps |
+| 03 | Transcript | Whisper (local `faster-whisper`, or Groq / OpenAI) writes every line with timestamps. Uploads to Groq / OpenAI are re-encoded to 16 kHz mono Opus (~0.2 MB/min); past 24 MB they are split into ~10-minute chunks at silences with 1.5 s overlap, then merged with overlap duplicates removed |
 | 04 | Flipbook | keyframes: every 0.5s of the first 3s (the hook), every scene cut, even coverage, the last frame, plus edit stats |
 | 05 | Opus 5.5 | watches the flipbook in order, reads the transcript, your context, idea, persona and assets, and writes the outputs below |
 

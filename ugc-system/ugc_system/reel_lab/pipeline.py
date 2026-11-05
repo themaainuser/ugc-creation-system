@@ -97,10 +97,13 @@ def run(job_path: Path, redo: set[str] | None = None) -> dict:
             job.update("transcribe", state="skipped", message="no audio")
         else:
             job.update("transcribe", state="running", message=f"provider: {transcribe.pick_provider()}")
-            tr = transcribe.transcribe(wav, lambda m: job.update("transcribe", message=m))
+            tr = transcribe.transcribe(wav, lambda m: job.update("transcribe", message=m), duration=duration,
+                                       cut_points=(info.get("audio") or {}).get("cut_points"))
             tr_path.write_text(json.dumps(tr, indent=2, ensure_ascii=False), encoding="utf-8")
             words = len(tr.get("text", "").split())
-            msg = tr.get("note") or f"{words} words - {tr.get('language') or '?'} - {tr['provider']}"
+            chunks = (tr.get("upload") or {}).get("chunks", 1)
+            msg = tr.get("note") or (f"{words} words - {tr.get('language') or '?'} - {tr['provider']}"
+                                     + (f" - {chunks} chunks" if chunks > 1 else ""))
             job.update("transcribe", state="done" if tr["provider"] != "none" else "skipped", message=msg)
         if wav.exists() and os.environ.get("UGC_KEEP_MEDIA") != "1":
             wav.unlink()  # temp file; the transcript is what we keep
