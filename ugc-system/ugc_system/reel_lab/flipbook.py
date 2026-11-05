@@ -12,17 +12,17 @@ from __future__ import annotations
 
 import os
 import re
-import subprocess
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
+from ..core import fsutil, proc
 
 HOOK_WINDOW = 3.0
 MIN_GAP = 0.35  # seconds; closer frames are near-duplicates
 
 
 def scene_cuts(video: Path, threshold: float = 0.27) -> list[float]:
-    out = subprocess.run(
+    out = proc.run(
         ["ffmpeg", "-v", "info", "-i", str(video), "-an", "-vf",
          f"select='gt(scene,{threshold})',showinfo", "-vsync", "vfr", "-f", "null", "-"],
         capture_output=True, text=True)
@@ -72,7 +72,7 @@ def plan_timestamps(duration: float, cuts: list[float], max_frames: int) -> list
 
 def _grab(video: Path, t: float, dest: Path, long_side: int) -> bool:
     scale = f"scale='if(gt(iw,ih),{long_side},-2)':'if(gt(iw,ih),-2,{long_side})'"
-    out = subprocess.run(
+    out = proc.run(
         ["ffmpeg", "-y", "-v", "error", "-ss", f"{t:.2f}", "-i", str(video),
          "-frames:v", "1", "-vf", scale, "-q:v", "3", str(dest)],
         capture_output=True, text=True)
@@ -85,7 +85,7 @@ def build(video: Path, out_dir: Path, duration: float, progress=lambda m: None) 
     frames_dir = out_dir / "frames"
     frames_dir.mkdir(parents=True, exist_ok=True)
     for old in frames_dir.glob("*.jpg"):
-        old.unlink()
+        fsutil.remove(old)
 
     progress("detecting scene cuts")
     cuts = scene_cuts(video)

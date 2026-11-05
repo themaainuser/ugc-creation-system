@@ -19,10 +19,10 @@ from __future__ import annotations
 import os
 import re
 import shutil
-import subprocess
 from difflib import SequenceMatcher
 from functools import lru_cache
 from pathlib import Path
+from ..core import fsutil, proc
 
 MAX_UPLOAD = 24 * 1024 * 1024  # bytes; above this we split (keeps a margin under the limit)
 API_LIMIT = 25 * 1024 * 1024   # what Groq / OpenAI actually refuse
@@ -87,7 +87,7 @@ def _local(wav: Path, progress) -> dict:
 # ------------------------------------------------------------- encoding
 @lru_cache(maxsize=1)
 def _encoders() -> str:
-    out = subprocess.run(["ffmpeg", "-hide_banner", "-encoders"], capture_output=True, text=True)
+    out = proc.run(["ffmpeg", "-hide_banner", "-encoders"], capture_output=True, text=True)
     return out.stdout
 
 
@@ -106,14 +106,14 @@ def encode_speech(src: Path, dest_stem: Path, start: float | None = None,
         if length:
             cmd += ["-t", f"{length:.3f}"]
         cmd += ["-vn", "-ac", "1", "-ar", "16000", *args, str(out)]
-        r = subprocess.run(cmd, capture_output=True, text=True)
+        r = proc.run(cmd, capture_output=True, text=True)
         if r.returncode == 0 and out.exists() and out.stat().st_size > 0:
             return out
     raise TranscribeError("ffmpeg could not encode the audio (needs libopus, libmp3lame or flac)")
 
 
 def _duration(path: Path) -> float:
-    r = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
+    r = proc.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
                         "-of", "default=nw=1:nk=1", str(path)], capture_output=True, text=True)
     try:
         return float(r.stdout.strip())
@@ -234,7 +234,7 @@ def _api(wav: Path, provider: str, progress, duration: float | None = None,
             duration = duration or _duration(wav)
             spans = plan_chunks(duration, CHUNK_SECONDS, OVERLAP, cut_points,
                                 lookback=min(SILENCE_LOOKBACK, CHUNK_SECONDS / 3))
-            full.unlink(missing_ok=True)
+            fsutil.remove(full)
             results, language = [], None
             for i, (a, b) in enumerate(spans, 1):
                 progress(f"chunk {i}/{len(spans)} · {_clock(a)}–{_clock(b)} → {provider}")
@@ -242,7 +242,7 @@ def _api(wav: Path, provider: str, progress, duration: float | None = None,
                 if part.stat().st_size > API_LIMIT:
                     raise TranscribeError(f"chunk {i} is still {part.stat().st_size / 1e6:.0f} MB after encoding")
                 res = _api_file(client, model, part)
-                part.unlink(missing_ok=True)
+                fsutil.remove(part)
                 language = language or res["language"]
                 results.append((a, b, res["segments"]))
             progress(f"merging {len(spans)} chunks")

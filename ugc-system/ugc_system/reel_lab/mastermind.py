@@ -16,7 +16,7 @@ import re
 import time
 from pathlib import Path
 
-from ..core import opus
+from ..core import fsutil, opus
 from ..core.env import ROOT
 from .transcribe import as_timed_text
 
@@ -197,7 +197,7 @@ def preview_markdown(req: dict) -> str:
 def run(job, progress=lambda m: None) -> dict:
     req = build_request(job)
     n_img = sum(1 for p in req["parts"] if p["type"] == "image")
-    (job.out / "request_preview.md").write_text(preview_markdown(req), encoding="utf-8")
+    fsutil.write_text(job.out / "request_preview.md", preview_markdown(req))
     if os.environ.get("UGC_MASTERMIND_DRY_RUN") == "1":
         return {"dry_run": True, "images": n_img}
 
@@ -212,21 +212,24 @@ def run(job, progress=lambda m: None) -> dict:
         now = time.time()
         if now - last[0] > 1.2:
             last[0] = now
-            partial.write_text("".join(buf), encoding="utf-8")
+            try:  # live preview only: skip a beat if OneDrive/antivirus holds the file
+                partial.write_text("".join(buf), encoding="utf-8")
+            except OSError:
+                pass
             progress(f"writing - {sum(map(len, buf)) / 1000:.1f}k chars")
 
     res = opus.complete(req, on_text, max_tokens=64000)
     text = res["text"]
-    (job.out / "raw_response.md").write_text(text, encoding="utf-8")
-    partial.unlink(missing_ok=True)
+    fsutil.write_text(job.out / "raw_response.md", text)
+    fsutil.remove(partial)
 
     sec = split_sections(text)
     if not sec["reel_flow"] and not sec["generation_prompts"]:
         raise MastermindError("model reply had no <reel_flow>/<generation_prompts> sections - see out/raw_response.md")
-    (job.out / "reel_flow.md").write_text(sec["reel_flow"], encoding="utf-8")
-    (job.out / "generation_prompts.md").write_text(sec["generation_prompts"], encoding="utf-8")
+    fsutil.write_text(job.out / "reel_flow.md", sec["reel_flow"])
+    fsutil.write_text(job.out / "generation_prompts.md", sec["generation_prompts"])
     if sec["blueprint_json"] is not None:
-        (job.out / "blueprint.json").write_text(json.dumps(sec["blueprint_json"], indent=2, ensure_ascii=False), encoding="utf-8")
+        fsutil.write_text(job.out / "blueprint.json", json.dumps(sec["blueprint_json"], indent=2, ensure_ascii=False))
 
     cost = res["est_cost_usd"]
     usage = {"provider": provider, "model": res["model"], "stop_reason": res["stop_reason"],

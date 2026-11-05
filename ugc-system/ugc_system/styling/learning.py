@@ -29,6 +29,7 @@ from pathlib import Path
 import numpy as np
 
 from ..core.env import ROOT
+from ..core import fsutil
 
 STATE_DIR = ROOT / "data" / "learning"
 PRIOR_STRENGTH = 6.0   # how many observations the hand-set prior is "worth"
@@ -91,8 +92,8 @@ class Learner:
 
     def save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_text(json.dumps({"features": self.features, "A": self.A.tolist(),
-                                         "b": self.b.tolist(), "history": self.history[-500:]}))
+        fsutil.write_text(self.path, json.dumps({"features": self.features, "A": self.A.tolist(),
+                                                 "b": self.b.tolist(), "history": self.history[-500:]}))
 
     def calibration(self) -> dict:
         h = self.history

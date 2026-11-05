@@ -11,6 +11,7 @@ import shutil
 import traceback
 from pathlib import Path
 
+from ..core import fsutil
 from ..core.env import load_env
 from . import flipbook, mastermind, media, transcribe
 from .job import JOBS_DIR, Job, read_json
@@ -67,7 +68,7 @@ def run(job_path: Path, redo: set[str] | None = None) -> dict:
 
         if "probe" not in info:
             info["probe"] = media.probe(video)
-        info_path.write_text(json.dumps(info, indent=2, ensure_ascii=False), encoding="utf-8")
+        fsutil.write_text(info_path, json.dumps(info, indent=2, ensure_ascii=False))
         duration = info["probe"]["duration"]
 
         # 2. audio ------------------------------------------------------
@@ -82,7 +83,7 @@ def run(job_path: Path, redo: set[str] | None = None) -> dict:
             job.update("audio", state="running", message="ffmpeg -> 16 kHz mono wav")
             media.extract_audio(video, wav)
             info["audio"] = media.audio_profile(wav, duration)
-            info_path.write_text(json.dumps(info, indent=2, ensure_ascii=False), encoding="utf-8")
+            fsutil.write_text(info_path, json.dumps(info, indent=2, ensure_ascii=False))
             sr = info["audio"].get("silent_ratio")
             job.update("audio", state="done", message=f"{duration:.1f}s" + (f" - {sr:.0%} silent" if sr is not None else ""))
         else:
@@ -93,20 +94,20 @@ def run(job_path: Path, redo: set[str] | None = None) -> dict:
         if tr_path.exists() and "transcribe" not in redo:
             job.update("transcribe", state="skipped", message="cached")
         elif not info["probe"]["has_audio"]:
-            tr_path.write_text(json.dumps({"provider": "none", "segments": [], "note": "no audio track"}), encoding="utf-8")
+            fsutil.write_text(tr_path, json.dumps({"provider": "none", "segments": [], "note": "no audio track"}))
             job.update("transcribe", state="skipped", message="no audio")
         else:
             job.update("transcribe", state="running", message=f"provider: {transcribe.pick_provider()}")
             tr = transcribe.transcribe(wav, lambda m: job.update("transcribe", message=m), duration=duration,
                                        cut_points=(info.get("audio") or {}).get("cut_points"))
-            tr_path.write_text(json.dumps(tr, indent=2, ensure_ascii=False), encoding="utf-8")
+            fsutil.write_text(tr_path, json.dumps(tr, indent=2, ensure_ascii=False))
             words = len(tr.get("text", "").split())
             chunks = (tr.get("upload") or {}).get("chunks", 1)
             msg = tr.get("note") or (f"{words} words - {tr.get('language') or '?'} - {tr['provider']}"
                                      + (f" - {chunks} chunks" if chunks > 1 else ""))
             job.update("transcribe", state="done" if tr["provider"] != "none" else "skipped", message=msg)
         if wav.exists() and os.environ.get("UGC_KEEP_MEDIA") != "1":
-            wav.unlink()  # temp file; the transcript is what we keep
+            fsutil.remove(wav)  # temp file; the transcript is what we keep
 
         # 4. flipbook ---------------------------------------------------
         stage = "flipbook"
@@ -117,7 +118,7 @@ def run(job_path: Path, redo: set[str] | None = None) -> dict:
         else:
             job.update("flipbook", state="running", message="sampling keyframes")
             idx = flipbook.build(video, job.flipbook, duration, lambda m: job.update("flipbook", message=m))
-            idx_path.write_text(json.dumps(idx, indent=2), encoding="utf-8")
+            fsutil.write_text(idx_path, json.dumps(idx, indent=2))
             s = idx["stats"]
             job.update("flipbook", state="done",
                        message=f"{len(idx['frames'])} frames - {s['shots']} shots - avg {s['avg_shot_s']}s")
@@ -138,11 +139,14 @@ def run(job_path: Path, redo: set[str] | None = None) -> dict:
                            usage=usage)
 
         if os.environ.get("UGC_KEEP_MEDIA") == "0" and video.exists():
-            video.unlink()
+            fsutil.remove(video)
         job.update(job_state="done")
     except Exception as e:  # report on the stage that failed, never crash silently
         msg = f"{type(e).__name__}: {e}" if not isinstance(
             e, (media.MediaError, transcribe.TranscribeError, mastermind.MastermindError)) else str(e)
         job.update(stage, state="error", message=msg[:600], job_state="error", error=msg[:600])
-        (job.path / "error.log").write_text(traceback.format_exc(), encoding="utf-8")
+        try:
+            fsutil.write_text(job.path / "error.log", traceback.format_exc())
+        except OSError:
+            pass
     return job.status

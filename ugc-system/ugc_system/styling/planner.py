@@ -18,7 +18,7 @@ from pathlib import Path
 import numpy as np
 import yaml
 
-from ..core import opus
+from ..core import fsutil, opus
 from ..core.env import ROOT, load_env
 from . import direction, outfit, scene as scene_mod, wardrobe
 from .learning import Learner, reward_from
@@ -264,7 +264,7 @@ def path_for(look_id: str, pid: str | None = None) -> Path:
 def save(look: dict) -> Path:
     p = path_for(look["id"], look["persona"])
     p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(json.dumps(look, indent=2, ensure_ascii=False), encoding="utf-8")
+    fsutil.write_text(p, json.dumps(look, indent=2, ensure_ascii=False))
     return p
 
 
@@ -297,7 +297,7 @@ def feedback(look_id: str, verdict: str, *, alt: int | None = None, rating: int 
         per = persona(look["persona"])
         sc = scene_mod.interpret({k: look["scene"][k] for k in ("mood", "place", "environment", "music", "notes", "date", "time_of_day", "brand")}, per)
         write_prompts(look["shots"], per, sc, pick["items"])
-    p.write_text(json.dumps(look, indent=2, ensure_ascii=False), encoding="utf-8")
+    fsutil.write_text(p, json.dumps(look, indent=2, ensure_ascii=False))
     return {"look": look, "calibration": {k: v.calibration() for k, v in L.items()}}
 
 

@@ -22,7 +22,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from ..core import opus
+from ..core import fsutil, opus
 from ..core.env import ROOT
 
 WARDROBE = ROOT / "wardrobe"
@@ -205,7 +205,9 @@ def scan() -> list[dict]:
         data = _normalise(data)
         if data.get("category") == "footwear" and data.get("subcategory") not in FOOTWEAR_KINDS:
             data["subcategory"] = guess(rel).get("subcategory", "sneakers")
-        side.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+        text = json.dumps(data, indent=2, ensure_ascii=False)
+        if not side.exists() or side.read_text(encoding="utf-8") != text:  # don't churn OneDrive on every page load
+            fsutil.write_text(side, text)
         items.append({**data, "id": re.sub(r"\.[^.]+$", "", rel), "file": rel, "demo": demo,
                       "root": "wardrobe" if not demo else "demo"})
     return items
@@ -262,7 +264,7 @@ def tag(force: bool = False, batch: int = 6, progress=lambda m: None) -> dict:
         for it, row in zip(chunk, rows if isinstance(rows, list) else []):
             img = image_path(it)
             data = _normalise({**row, "pixel_colors": it.get("pixel_colors", []), "tagged_by": "opus"})
-            img.with_suffix(".json").write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+            fsutil.write_text(img.with_suffix(".json"), json.dumps(data, indent=2, ensure_ascii=False))
             done += 1
     return {"tagged": done, "cost_usd": round(cost, 4), "remaining": len(todo) - done}
 

@@ -15,7 +15,7 @@ from functools import lru_cache
 
 import yaml
 
-from ..core import opus
+from ..core import fsutil, opus
 from ..core.env import ROOT
 
 CFG = ROOT / "config" / "styling"
@@ -162,7 +162,7 @@ def _opus_place(place: str, environment: str) -> dict | None:
         return None
     CACHE.parent.mkdir(parents=True, exist_ok=True)
     cache[key] = data
-    CACHE.write_text(json.dumps(cache, indent=2))
+    fsutil.write_text(CACHE, json.dumps(cache, indent=2))
     return data
 
 
