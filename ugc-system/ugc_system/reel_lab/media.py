@@ -5,8 +5,8 @@ import json
 import os
 import re
 import shutil
-import subprocess
 from pathlib import Path
+from ..core import proc
 
 VIDEO_EXTS = {".mp4", ".mov", ".m4v", ".webm", ".mkv"}
 
@@ -88,7 +88,7 @@ def download(url: str, media_dir: Path, progress=lambda msg: None) -> tuple[Path
 
 
 def probe(video: Path) -> dict:
-    out = subprocess.run(
+    out = proc.run(
         ["ffprobe", "-v", "error", "-print_format", "json",
          "-show_format", "-show_streams", str(video)],
         capture_output=True, text=True)
@@ -117,7 +117,7 @@ def probe(video: Path) -> dict:
 
 def extract_audio(video: Path, wav: Path) -> None:
     """16 kHz mono PCM — what every speech model wants."""
-    out = subprocess.run(
+    out = proc.run(
         ["ffmpeg", "-y", "-v", "error", "-i", str(video), "-vn", "-ac", "1",
          "-ar", "16000", "-c:a", "pcm_s16le", str(wav)],
         capture_output=True, text=True)
@@ -128,7 +128,7 @@ def extract_audio(video: Path, wav: Path) -> None:
 def audio_profile(wav: Path, duration: float) -> dict:
     """Loudness + silent stretches. Lets the mastermind tell talking-head
     reels from trending-sound reels and spot beat drops / dead air."""
-    out = subprocess.run(
+    out = proc.run(
         ["ffmpeg", "-v", "info", "-i", str(wav), "-af",
          "silencedetect=noise=-35dB:d=0.4,volumedetect", "-f", "null", "-"],
         capture_output=True, text=True)

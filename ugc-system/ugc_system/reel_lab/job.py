@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from ..core.env import ROOT
+from ..core import fsutil
 
 JOBS_DIR = ROOT / "data" / "jobs"
 STAGES = ["download", "audio", "transcribe", "flipbook", "mastermind"]
@@ -35,9 +36,8 @@ def new_job_id() -> str:
 
 
 def _write_json(path: Path, data) -> None:
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
-    os.replace(tmp, path)  # atomic, so the UI never reads half a file
+    # atomic + retries through OneDrive / antivirus locks (Windows "Access is denied")
+    fsutil.write_text(path, json.dumps(data, indent=2, ensure_ascii=False))
 
 
 def read_json(path: Path, default=None):
@@ -48,8 +48,11 @@ def read_json(path: Path, default=None):
 
 
 class Job:
+    PROGRESS_EVERY = 0.5  # seconds between message-only status writes
+
     def __init__(self, path: Path):
         self.path = Path(path)
+        self._last_write = 0.0
         self.media = self.path / "media"
         self.flipbook = self.path / "flipbook"
         self.assets = self.path / "assets"
@@ -93,6 +96,9 @@ class Job:
     def update(self, stage: str | None = None, *, state: str | None = None,
                message: str | None = None, job_state: str | None = None,
                error: str | None | object = ..., **extra) -> None:
+        progress_only = state is None and job_state is None and error is ... and not extra
+        if progress_only and time.time() - self._last_write < self.PROGRESS_EVERY:
+            return  # e.g. "frame 12/48": the UI polls every 1.5 s anyway
         st = self.status or {"stages": {}}
         if stage:
             s = st["stages"].setdefault(stage, {"label": STAGE_LABELS.get(stage, stage)})
@@ -110,7 +116,12 @@ class Job:
         if error is not ...:
             st["error"] = error
         st["updated_at"] = time.time()
-        _write_json(self.path / "status.json", st)
+        try:
+            _write_json(self.path / "status.json", st)
+        except PermissionError:
+            if not progress_only:  # a lost progress line is fine; a lost state change is not
+                raise
+        self._last_write = time.time()
 
     def write_json(self, rel: str, data) -> Path:
         p = self.path / rel
